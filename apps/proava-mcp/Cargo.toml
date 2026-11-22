@@ -1,0 +1,31 @@
+[package]
+name = "proava-mcp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "proava-mcp"
+path = "src/main.rs"
+
+[dependencies]
+proava-domain = { path = "../../crates/proava-domain" }
+proava-application = { path = "../../crates/proava-application" }
+proava-infrastructure = { path = "../../crates/proava-infrastructure" }
+proava-exchange = { path = "../../crates/proava-exchange" }
+proava-spell = { path = "../../crates/proava-spell" }
+# Nur die Absprache mit dem Browserfenster (serde_json), keine Browser-Engine.
+proava-web-protocol = { path = "../../crates/proava-web-protocol" }
+# Absprache mit den laufenden proAVA-Fenstern (lokale Brücke).
+proava-bridge-protocol = { path = "../../crates/proava-bridge-protocol" }
+serde_json.workspace = true
+chrono.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+proava-gaeb = { path = "../../crates/proava-gaeb" }
+proava-print = { path = "../../crates/proava-print" }

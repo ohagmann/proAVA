@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetisches LV mit STLB-Bau-Kennungen (STLBBau), einer alten Standardleistungsnummer (StLNo) und einer freien Position. Selbst geschrieben für proAVA, frei verwendbar; alle Schlüsselnummern sind ausgedacht, die Texte stammen nicht aus STLB-Bau. -->
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.3">
+<GAEBInfo><Version>3.3</Version><VersDate>2021-05</VersDate><Date>2026-11-17</Date><ProgSystem>proAVA Testdaten</ProgSystem><ProgName>proAVA</ProgName></GAEBInfo>
+<PrjInfo><NamePrj>SYN-4</NamePrj><LblPrj>STLB-Bau-Kennungen</LblPrj><Cur>EUR</Cur><CurLbl>Euro</CurLbl></PrjInfo>
+<Award><DP>83</DP><AwardInfo><Cur>EUR</Cur><CurLbl>Euro</CurLbl></AwardInfo>
+<BoQ ID="B1"><BoQInfo><Name>SYN-4</Name><LblBoQ>STLB-Bau</LblBoQ><Date>2026-11-17</Date><OutlCompl>AllTxt</OutlCompl><BoQBkdn><Type>BoQLevel</Type><LblBoQBkdn>Titel</LblBoQBkdn><Length>2</Length><Num>Yes</Num></BoQBkdn><BoQBkdn><Type>Item</Type><Length>4</Length><Num>Yes</Num></BoQBkdn></BoQInfo>
+<BoQBody><BoQCtgy ID="T01" RNoPart="01"><LblTx><p><span>Gebäudeautomation</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="I1" RNoPart="0010"><Qty>4.000</Qty><QU>St</QU><Description>
+<STLBBau><STLBBauCtlg><CtlgName>STLB-Bau</CtlgName><VersDate>2026-04</VersDate><WCtg>070</WCtg><Group>9001</Group><CostGrp>481</CostGrp></STLBBauCtlg>
+<STLBBauID><ArtChrIdent>90011</ArtChrIdent><ArtChIdx>0</ArtChIdx><ChVIdent>2</ChVIdent><OutlTextPart>Yes</OutlTextPart></STLBBauID>
+<STLBBauID><ArtChrIdent>90012</ArtChrIdent><ArtChIdx>0</ArtChIdx><ChVIdent>7</ChVIdent></STLBBauID>
+<STLBBauID><ArtChrIdent>90013</ArtChrIdent></STLBBauID></STLBBau>
+<CompleteText><ComplTSA>Yes</ComplTSA><DetailTxt><Text><p><span>Testgerät Raumbediengerät für Einzelraumregelung, Unterputzmontage, Anzeige Raumtemperatur, Farbe </span><TextComplement MarkLbl="1" Kind="Owner" ArtChrIdent="90013"><ComplBody><span>'reinweiß'</span></ComplBody></TextComplement><span>.</span></p></Text></DetailTxt><OutlineText><OutlTxt><TextOutlTxt><p><span>Testgerät Raumbediengerät UP</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="I2" RNoPart="0020"><Qty>2.000</Qty><QU>St</QU><Description>
+<STLBBau><STLBBauCtlg><CtlgName>STLB-Bau</CtlgName><VersDate>2025-10</VersDate><WCtg>070</WCtg><Group>9002</Group></STLBBauCtlg>
+<STLBBauID><ArtChrIdent>90021</ArtChrIdent><ArtChIdx>1</ArtChIdx><ChVIdent>3</ChVIdent></STLBBauID>
+<STLBBauID><ArtChrIdent>90022</ArtChrIdent></STLBBauID></STLBBau>
+<CompleteText><ComplTSB>Yes</ComplTSB><DetailTxt><Text><p><span>Testgerät Temperaturfühler für Kanaleinbau.</span></p><p><span>Fabrikat: </span><TextComplement MarkLbl="2" Kind="Bidder" ArtChrIdent="90022"><ComplBody><span>..............................</span></ComplBody></TextComplement></p></Text></DetailTxt><OutlineText><OutlTxt><TextOutlTxt><p><span>Testgerät Kanalfühler</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="I3" RNoPart="0030"><Qty>10.000</Qty><QU>m</QU><Description><StLNo Type="StLB">12345678901234567</StLNo>
+<CompleteText><DetailTxt><Text><p><span>Testtext mit alter Standardleistungsnummer.</span></p></Text></DetailTxt><OutlineText><OutlTxt><TextOutlTxt><p><span>Alte StLB-Nummer</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="I4" RNoPart="0040"><LumpSumItem>Yes</LumpSumItem><Qty>1.000</Qty><QU>psch</QU><Description><CompleteText><DetailTxt><Text><p><span>Freier Text ohne Katalog.</span></p></Text></DetailTxt><OutlineText><OutlTxt><TextOutlTxt><p><span>Freie Position</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy></BoQBody></BoQ></Award>
+</GAEB>

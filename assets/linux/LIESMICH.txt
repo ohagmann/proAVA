@@ -1,0 +1,43 @@
+proAVA für Linux
+=================
+
+proAVA comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law. Use at your own risk; check all results (LV, quantities,
+prices, totals, GAEB files) before you rely on them.
+
+proAVA wird ohne jegliche Gewährleistung bereitgestellt, soweit gesetzlich
+zulässig. Die Nutzung erfolgt auf eigenes Risiko; alle Ergebnisse (LV,
+Mengen, Preise, Summen, GAEB-Dateien) vor Verwendung prüfen. Die Haftung
+für Vorsatz und grobe Fahrlässigkeit bleibt unberührt.
+
+Inhalt dieses Ordners
+  proava                  das Programm
+  proava-mcp              MCP-Server für KI-Assistenten (optional)
+  proava-web              Browserfenster für AUSSCHREIBEN.DE und STLB-Bau Online
+                          (nur, wenn es mitgebaut wurde; sonst der System-Browser)
+  proava-handbuch.pdf     Handbuch (auch im Programm unter Hilfe > Handbuch)
+  LICENSE                 Lizenz von proAVA (Business Source License 1.1)
+  THIRD-PARTY-NOTICES     Lizenzen der verwendeten Bibliotheken und Schriften
+  install_linux.sh        Einrichtung für den eigenen Benutzer (ohne sudo)
+
+Einrichten
+  ./install_linux.sh legt Programm, Startmenüeintrag, Symbol und MIME-Typen
+  unter ~/.local an; ./install_linux.sh --entfernen nimmt alles wieder weg.
+  Ohne Einrichtung startet ./proava direkt aus diesem Ordner.
+
+Lizenz
+  © 2026 Oliver Hagmann. proAVA ist quelloffen und kostenlos unter der
+  Business Source License 1.1 (LICENSE); verbindlich ist der englische Text.
+  Kurz: kommerzielle Nutzung für eigene Zwecke ist erlaubt (Planungsbüros,
+  Bauherren, öffentliche Auftraggeber, Bieter für ihre Angebote), ebenso
+  Schulung, Einrichtung, Beratung und Weitergabe. Nicht von der Erlaubnis
+  umfasst: proAVA oder ein davon abgeleitetes Werk als eigenständiges
+  Produkt oder als Hauptbestandteil eines kostenpflichtigen Softwarepakets
+  verkaufen oder als gehosteten oder verwalteten Dienst (SaaS) anbieten.
+  Abwandlungen bleiben unter dieser Lizenz. Ab 20.11.2030 gilt die
+  GNU AGPL v3.0 oder später.
+
+Namen Dritter
+  STLB-Bau, GAEB, AUSSCHREIBEN.DE und DIN 276 sind Namen bzw. Normen
+  Dritter; proAVA ist mit diesen Stellen nicht verbunden und von ihnen
+  nicht autorisiert.

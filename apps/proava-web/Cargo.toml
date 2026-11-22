@@ -1,0 +1,28 @@
+[package]
+name = "proava-web"
+version = "0.2.0"
+edition = "2021"
+license = "BUSL-1.1"
+authors = ["Oliver Hagmann"]
+description = "Eingebautes Browserfenster für AUSSCHREIBEN.DE und STLB-Bau Online (Hilfsprogramm von proAVA)"
+
+# Eigener Workspace: wry/tao und die Browser-Engine (WebKitGTK unter Linux,
+# WebView2 unter Windows) bleiben aus dem Abhängigkeitsbaum von proava und
+# proava-mcp heraus. Bauen: cargo build --release --manifest-path apps/proava-web/Cargo.toml
+[workspace]
+
+[dependencies]
+proava-web-protocol = { path = "../../crates/proava-web-protocol" }
+wry = "0.57"
+tao = "0.37"
+directories = "5"
+serde_json = "1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Dieselben Fassungen wie in wry (keine neue C-Bibliothek: GTK 3 und
+# WebKitGTK 4.1 braucht wry ohnehin).
+gtk = "0.18"
+webkit2gtk = { version = "=2.0.2", features = ["v2_38"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }

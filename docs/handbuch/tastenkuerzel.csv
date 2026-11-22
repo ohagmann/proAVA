@@ -1,0 +1,84 @@
+Bereich;Befehl;Tasten
+Überall;Speichern;Strg+S
+Überall;Rückgängig;Strg+Z
+Überall;Wiederholen;Strg+Y oder Strg+Umschalt+Z
+Überall;Eigenschaftenfenster ein-/ausblenden;Strg+E
+Überall;Bibliothek ein-/ausblenden;F8
+Überall;Drucken …;Strg+P
+Überall;Ansicht LV;Strg+1
+Überall;Ansicht Angebote;Strg+2
+Überall;Ansicht Preisspiegel;Strg+3
+Überall;Ansicht Abrechnung;Strg+4
+Überall;Ansicht Nachträge;Strg+5
+Überall;Ansicht Kosten;Strg+6
+Überall;Ansicht Kostenverfolgung;Strg+7
+Überall;Befehl suchen;Strg+K
+Überall;Hilfe zur aktuellen Ansicht;F1
+Neue Zeilen (überall in der LV-Ansicht);Neue Position aus STLB-Bau …;F5
+Neue Zeilen (überall in der LV-Ansicht);Neue Position aus AUSSCHREIBEN.DE …;F6
+Neue Zeilen (überall in der LV-Ansicht);Neue Position darunter;F9 oder Strg+Enter oder Einfg
+Neue Zeilen (überall in der LV-Ansicht);Neue Position davor;Umschalt+F9 oder Umschalt+Einfg
+Neue Zeilen (überall in der LV-Ansicht);Neuer Hinweis darunter;F10 oder Strg+H
+Neue Zeilen (überall in der LV-Ansicht);Neuer Hinweis davor;Strg+F10 oder Strg+Umschalt+H
+Neue Zeilen (überall in der LV-Ansicht);Neue Ausführungsbeschreibung;F11 oder Strg+Umschalt+A
+Neue Zeilen (überall in der LV-Ansicht);Neuer Titel;F12 oder Strg+Umschalt+Enter oder Strg+T
+Neue Zeilen (überall in der LV-Ansicht);Neuer Untertitel;Umschalt+F12 oder Strg+Umschalt+T
+LV-Tabelle;Aktive Zelle bearbeiten (oder einfach lostippen);F2 oder Enter
+LV-Tabelle;Zelle nach links, auf Titeln: zuklappen;←
+LV-Tabelle;Zelle nach rechts, auf Titeln: aufklappen;→
+LV-Tabelle;Kontextmenü der Zeile (wie Rechtsklick);Umschalt+F10
+LV-Tabelle;Zeile darüber;↑
+LV-Tabelle;Zeile darunter;↓
+LV-Tabelle;Auswahl nach oben erweitern;Umschalt+↑
+LV-Tabelle;Auswahl nach unten erweitern;Umschalt+↓
+LV-Tabelle;Seite hoch;Bild↑
+LV-Tabelle;Seite runter;Bild↓
+LV-Tabelle;Erste Zeile;Pos1
+LV-Tabelle;Letzte Zeile;Ende
+LV-Tabelle;Neuer Abstandshalter darunter (Leerzeile);Strg+L
+LV-Tabelle;Langtext im eigenen Fenster bearbeiten …;Umschalt+F2
+LV-Tabelle;Eigenschaften im eigenen Fenster …;Alt+Enter
+LV-Tabelle;Löschen;Entf
+LV-Tabelle;Duplizieren;Strg+D
+LV-Tabelle;Nach oben schieben;Alt+↑
+LV-Tabelle;Nach unten schieben;Alt+↓
+LV-Tabelle;Titel eine Stufe tiefer;Tab
+LV-Tabelle;Titel eine Stufe höher;Umschalt+Tab
+LV-Tabelle;Alle Zeilen markieren;Strg+A
+LV-Tabelle;Kopieren;Strg+C
+LV-Tabelle;Ausschneiden;Strg+X
+LV-Tabelle;Einfügen;Strg+V
+LV-Tabelle;Suchen;Strg+F
+LV-Tabelle;Weitersuchen;F3
+LV-Tabelle;Suchen und Ersetzen;Strg+R
+LV-Tabelle;Leere Mengen finden;F4
+LV-Tabelle;Status: in Bearbeitung;Strg+Umschalt+E
+LV-Tabelle;Fertig/offen umschalten;Strg+Umschalt+F
+LV-Tabelle;Offene Punkte …;Strg+Umschalt+P
+LV-Tabelle;Rechtschreibung prüfen …;F7
+LV-Gliederung (auch beim Schreiben);Ordnungszahl ändern …;Strg+Umschalt+O
+Beim Bearbeiten einer Zelle;Übernehmen, nächste Zelle;Tab
+Beim Bearbeiten einer Zelle;Übernehmen, vorige Zelle;Umschalt+Tab
+Beim Bearbeiten einer Zelle;Übernehmen, Zeile darunter;Enter
+Beim Bearbeiten einer Zelle;Bearbeiten abbrechen;Esc
+Beim Bearbeiten einer Zelle;KG/LB: Eintrag der Liste wählen;↓ oder ↑
+Texteditor (Langtext, Hinweis);Fett;Strg+B
+Texteditor (Langtext, Hinweis);Kursiv;Strg+I
+Texteditor (Langtext, Hinweis);Unterstrichen;Strg+U
+Texteditor (Langtext, Hinweis);Bieterangabe einfügen … (an der Schreibmarke);Strg+Umschalt+B
+Texteditor (Langtext, Hinweis);Angabe des Auftraggebers einfügen …;Strg+Umschalt+G
+Abrechnung (Positionen einer Rechnung);Position wählen, im Feld: übernehmen, gleiche Spalte darunter/darüber;↓ oder ↑
+Abrechnung (Positionen einer Rechnung);15 Positionen weiter/zurück;Bild↓ oder Bild↑
+Abrechnung (Positionen einer Rechnung);Erste/letzte Position;Pos1 oder Ende
+Abrechnung (Positionen einer Rechnung);„geprüft“ bearbeiten (Tab: nächstes Feld, Enter: übernehmen);Enter oder F2
+Abrechnung (Positionen einer Rechnung);Aufmaß der Position;Strg+M
+Kosten (Anlagenliste beim Bearbeiten einer Zelle);Übernehmen, nächste Zelle;Tab
+Kosten (Anlagenliste beim Bearbeiten einer Zelle);Übernehmen, vorige Zelle;Umschalt+Tab
+Kosten (Anlagenliste beim Bearbeiten einer Zelle);Übernehmen, Zelle darunter;Enter
+Kosten (Anlagenliste beim Bearbeiten einer Zelle);Übernehmen, Zelle darüber;Umschalt+Enter
+Kosten (Anlagenliste beim Bearbeiten einer Zelle);Übernehmen und neue Zeile darunter;Strg+Enter
+Kosten (Anlagenliste beim Bearbeiten einer Zelle);Bearbeiten abbrechen;Esc
+Dateidialog (Öffnen, Speichern, Ordner wählen);Ordner oder Datei wählen;↓ oder ↑
+Dateidialog (Öffnen, Speichern, Ordner wählen);Gewählten Ordner öffnen, Datei übernehmen;Enter
+Dateidialog (Öffnen, Speichern, Ordner wählen);Eine Ebene höher;Rücktaste oder Alt+↑
+Dateidialog (Öffnen, Speichern, Ordner wählen);Neuer Ordner (Speichern, Ordner wählen);Strg+Umschalt+N

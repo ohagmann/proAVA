@@ -1,0 +1,82 @@
+proAVA für Windows
+===================
+
+Unter Windows 11 nur kurz erprobt (Start, Projekt laden); nicht umfassend
+getestet.
+
+proAVA comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law. Use at your own risk; check all results (LV, quantities,
+prices, totals, GAEB files) before you rely on them.
+
+proAVA wird ohne jegliche Gewährleistung bereitgestellt, soweit gesetzlich
+zulässig. Die Nutzung erfolgt auf eigenes Risiko; alle Ergebnisse (LV,
+Mengen, Preise, Summen, GAEB-Dateien) vor Verwendung prüfen. Die Haftung
+für Vorsatz und grobe Fahrlässigkeit bleibt unberührt.
+
+Inhalt dieses Ordners
+  proava.exe              das Programm (Doppelklick startet es)
+  proava-mcp.exe          MCP-Server für KI-Assistenten (Konsolenprogramm, optional)
+  proava-web.exe          Browserfenster für AUSSCHREIBEN.DE und STLB-Bau Online
+                           (startet proAVA selbst; nutzt die Microsoft Edge WebView2
+                           Runtime, die zu Windows 10/11 gehört)
+  proava-handbuch.pdf     Handbuch (auch im Programm unter Hilfe > Handbuch)
+  LICENSE.txt              Lizenz von proAVA (Business Source License 1.1)
+  THIRD-PARTY-NOTICES.txt  Lizenzen der verwendeten Bibliotheken und Schriften
+  dictionaries\            Platz für ein deutsches Wörterbuch (siehe unten)
+
+Installation
+  Keine. Den Ordner an einen beliebigen Ort kopieren, z. B. nach
+  C:\Programme\proAVA oder auf ein Netzlaufwerk, und proava.exe starten.
+  Es wird nichts in die Registrierung geschrieben, keine DLLs oder
+  Laufzeitbibliotheken sind nötig.
+
+Erster Start
+  Das Programm ist nicht signiert. Windows SmartScreen fragt deshalb beim
+  ersten Start: „Weitere Informationen“ > „Trotzdem ausführen“.
+
+Einstellungen
+  %APPDATA%\proava\settings.json (zuletzt verwendete Projekte, Ordner,
+  Einstellungen). Projekte und Bibliothek liegen dort, wo Sie sie speichern,
+  auch auf Netzlaufwerken oder Freigaben (\\server\freigabe\...).
+
+Dateien neben dem Projekt
+  Solange ein Projekt geöffnet ist, liegt daneben die Sperrdatei
+  „.~lock.<Projekt>.proava#“ (wie bei LibreOffice); ein zweites proAVA
+  bietet dann „Schreibgeschützt öffnen“ an. Die automatische Sicherung heißt
+  „.<Projekt>.proava.autosave“. Beide sieht man im Explorer (unter Windows
+  sind Dateien mit Punkt am Anfang nicht versteckt); bitte nicht löschen,
+  solange proAVA läuft. Sicherungen: „<Projekt>_Sicherung_<Datum>.zip“.
+
+Kommandozeile
+  proava.exe "C:\Pfad\Projekt.proava"   öffnet das Projekt
+  proava.exe LV.X83                      Neues Projekt aus GAEB (auch .D83, .csv)
+  proava.exe --version                   Version und Build
+
+Rechtschreibprüfung
+  proAVA nimmt das deutsche Wörterbuch von LibreOffice, wenn LibreOffice
+  installiert ist. Sonst die Dateien de_DE.aff und de_DE.dic (Hunspell) in
+  den Ordner „dictionaries“ neben proava.exe legen oder unter
+  Extras > Einstellungen einen Ordner wählen.
+
+Grafik
+  Das Fenster braucht OpenGL 2.0 vom Grafiktreiber. In virtuellen Maschinen
+  oder über Remotedesktop ohne Grafiktreiber startet das Fenster nicht;
+  dann Mesa opengl32.dll (llvmpipe) neben proava.exe legen.
+
+Lizenz
+  © 2026 Oliver Hagmann. proAVA ist quelloffen und kostenlos unter der
+  Business Source License 1.1 (LICENSE.txt); verbindlich ist der englische
+  Text. Kurz:
+  kommerzielle Nutzung für eigene Zwecke ist erlaubt (Planungsbüros,
+  Bauherren, öffentliche Auftraggeber, Bieter für ihre Angebote), ebenso
+  Schulung, Einrichtung, Beratung und Weitergabe. Nicht von der Erlaubnis
+  umfasst: proAVA oder ein davon abgeleitetes Werk als eigenständiges
+  Produkt oder als Hauptbestandteil eines kostenpflichtigen Softwarepakets
+  verkaufen oder als gehosteten oder verwalteten Dienst (SaaS) anbieten.
+  Abwandlungen bleiben unter dieser Lizenz. Ab 20.11.2030 gilt die
+  GNU AGPL v3.0 oder später.
+
+Namen Dritter
+  STLB-Bau, GAEB, AUSSCHREIBEN.DE und DIN 276 sind Namen bzw. Normen
+  Dritter; proAVA ist mit diesen Stellen nicht verbunden und von ihnen
+  nicht autorisiert.

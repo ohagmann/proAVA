@@ -1,0 +1,14 @@
+[package]
+name = "proava-spell"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+# Hunspell-compatible checker in pure Rust (MPL-2.0); the dictionaries are
+# read from the system at run time, never built in.
+spellbook = "0.4.2"
+
+[dev-dependencies]
+tempfile.workspace = true

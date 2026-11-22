@@ -1,0 +1,15 @@
+Wörterbuch für die Rechtschreibprüfung
+=====================================
+
+Hier können die Dateien eines deutschen Hunspell-Wörterbuchs liegen:
+
+  de_DE.aff und de_DE.dic
+  (oder de_DE_frami.aff/.dic, de_AT.*, de_CH.*)
+
+proAVA sucht in dieser Reihenfolge:
+  1. den Ordner aus Extras > Einstellungen,
+  2. diesen Ordner „dictionaries“ neben proava.exe,
+  3. die Wörterbücher von LibreOffice/OpenOffice
+     (C:\Program Files\LibreOffice\share\extensions\dict-de).
+
+Fachwörter der Gebäudeautomation kennt proAVA auch ohne Wörterbuch.

@@ -1,0 +1,30 @@
+# Build
+/target
+**/target
+/dist
+
+# Editoren und Systemdateien
+*.swp
+*~
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+
+# Laufzeit- und Testausgaben (nie Kundendaten ins Repo)
+*.pid
+*.log
+*.orig
+*.rej
+.~lock.*#
+*_Sicherung_*.zip
+/berichte/
+/bericht*.md
+/testausgabe/
+/rt/
+/gen/
+*.proava
+!crates/**/tests/data/*.proava
+
+# GAEB-Muster und -Schemas (Lizenz: nicht ins Repo, siehe docs/BUILD.md)
+*.xsd

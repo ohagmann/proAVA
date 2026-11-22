@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- proAVA-Programmsymbol: blaue Kachel mit „A“ (wie im Starter), darunter drei LV-Zeilen.
+     Quelle für scripts/make_icons.py – Geometrie dort gleich halten. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect x="8" y="8" width="240" height="240" rx="52" ry="52" fill="#2563C9"/>
+  <path fill="#FFFFFF" fill-rule="evenodd"
+        d="M112 40 H144 L196 168 H164 L154 142 H102 L92 168 H60 Z M128 74 L112 116 H144 Z"/>
+  <rect x="60" y="186" width="136" height="12" rx="6" fill="#FFFFFF" fill-opacity="0.85"/>
+  <rect x="60" y="208" width="96" height="12" rx="6" fill="#FFFFFF" fill-opacity="0.6"/>
+</svg>

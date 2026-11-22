@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MIME-Typen für proAVA (scripts/install_linux.sh legt sie nach ~/.local/share/mime). -->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-proava">
+    <comment>proAVA project</comment>
+    <comment xml:lang="de">proAVA-Projekt</comment>
+    <sub-class-of type="application/zip"/>
+    <generic-icon name="proava"/>
+    <glob pattern="*.proava" weight="80"/>
+  </mime-type>
+  <mime-type type="application/x-gaeb-xml">
+    <comment>GAEB DA XML bill of quantities</comment>
+    <comment xml:lang="de">GAEB-DA-XML-Leistungsverzeichnis</comment>
+    <sub-class-of type="application/xml"/>
+    <generic-icon name="proava"/>
+    <glob pattern="*.x81"/>
+    <glob pattern="*.x82"/>
+    <glob pattern="*.x83"/>
+    <glob pattern="*.x84"/>
+    <glob pattern="*.x85"/>
+    <glob pattern="*.x86"/>
+  </mime-type>
+  <mime-type type="application/x-gaeb90">
+    <comment>GAEB 90 bill of quantities</comment>
+    <comment xml:lang="de">GAEB-90-Leistungsverzeichnis</comment>
+    <sub-class-of type="text/plain"/>
+    <generic-icon name="proava"/>
+    <glob pattern="*.d81"/>
+    <glob pattern="*.d82"/>
+    <glob pattern="*.d83"/>
+    <glob pattern="*.d84"/>
+    <glob pattern="*.d85"/>
+    <glob pattern="*.d86"/>
+  </mime-type>
+</mime-info>

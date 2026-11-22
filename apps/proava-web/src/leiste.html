@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>proAVA – Leiste</title>
+<style>
+  :root { --text: #1f2328; --dim: #5b636e; --line: #cfd4da; --hover: #e4e8ed; --accent: #004f7c; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #f3f5f7; color: var(--text);
+    font: 13px/1.2 "Segoe UI", "Noto Sans", "DejaVu Sans", Arial, sans-serif; user-select: none; }
+  body { display: flex; align-items: center; gap: 4px; padding: 0 8px; box-sizing: border-box;
+    border-bottom: 1px solid var(--line); }
+  button { display: inline-flex; align-items: center; gap: 6px; height: 30px; min-width: 30px; padding: 0 7px;
+    border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text);
+    font: inherit; cursor: pointer; white-space: nowrap; flex: none; }
+  button:hover:not(:disabled) { background: var(--hover); border-color: var(--line); }
+  button:disabled { color: #b4bac1; cursor: default; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7;
+    stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  #adresse { flex: 1 1 30%; min-width: 120px; height: 26px; padding: 0 9px; border: 1px solid var(--line);
+    border-radius: 5px; background: #fff; color: var(--dim); display: flex; align-items: center;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis; user-select: text; }
+  #adresse span { overflow: hidden; text-overflow: ellipsis; }
+  .info { flex: 1 1 35%; min-width: 80px; display: flex; flex-direction: column; justify-content: center;
+    overflow: hidden; padding-left: 6px; border-left: 1px solid var(--line); margin-left: 4px; }
+  .info div { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  #ziel { color: var(--text); }
+  #status { color: var(--accent); font-size: 12px; }
+  .trenner { width: 1px; height: 22px; background: var(--line); margin: 0 3px; }
+  #frage { display: none; flex: 1 1 35%; align-items: center; gap: 6px; padding-left: 6px;
+    border-left: 1px solid var(--line); margin-left: 4px; overflow: hidden; }
+  #frage span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  #frage button { border-color: var(--line); background: #fff; }
+  #ja { color: #fff; background: #a4262c !important; border-color: #a4262c !important; }
+  body.fragt .info { display: none; }
+  body.fragt #frage { display: flex; }
+</style>
+</head>
+<body>
+  <button id="back" title="Zurück" disabled>
+    <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button id="forward" title="Vor" disabled>
+    <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  <button id="reload" title="Neu laden">
+    <svg viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.05-4.95"/><path d="M19 4v4h-4"/></svg></button>
+  <button id="home" title="Startseite">
+    <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg></button>
+  <div id="adresse" title=""><span></span></div>
+  <button id="system" title="Diese Seite im System-Browser öffnen">
+    <svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5H5V6h5"/></svg>
+    <span>Im System-Browser öffnen</span></button>
+  <button id="logout" title="Abmelden: Anmeldung, Cookies und gespeicherte Daten dieser Seite im Browserfenster löschen (auch die Merkliste)">
+    <svg viewBox="0 0 24 24"><path d="M10 5H5v14h5"/><path d="M14 8l4 4-4 4"/><path d="M18 12H9"/></svg>
+    <span>Abmelden</span></button>
+  <div class="info">
+    <div id="ziel"></div>
+    <div id="status"></div>
+  </div>
+  <div id="frage">
+    <span title="Abmelden und alle gespeicherten Daten dieser Seite im Browserfenster löschen (Anmeldung, Cookies, Merkliste)">Anmeldung, Cookies und Merkliste dieser Seite löschen?</span>
+    <button id="ja">Löschen</button>
+    <button id="nein">Abbrechen</button>
+  </div>
+<script>
+  // Eigene Leiste von proAVA (eigene Seite, nicht in der Website): Knöpfe melden sich beim Hilfsprogramm,
+  // das Hilfsprogramm schreibt den Zustand über proava.state(...) zurück.
+  for (const id of ["back", "forward", "reload", "home", "system"]) {
+    document.getElementById(id).addEventListener("click", () => window.ipc.postMessage(id));
+  }
+  // Rückfrage in der Leiste selbst (ein Skript-Dialog wäre in der schmalen Leiste abgeschnitten).
+  document.getElementById("logout").addEventListener("click", () => document.body.classList.add("fragt"));
+  document.getElementById("nein").addEventListener("click", () => document.body.classList.remove("fragt"));
+  document.getElementById("ja").addEventListener("click", () => {
+    document.body.classList.remove("fragt");
+    window.ipc.postMessage("logout");
+  });
+  window.proava = {
+    state(s) {
+      document.getElementById("back").disabled = !s.back;
+      document.getElementById("forward").disabled = !s.forward;
+      const adresse = document.getElementById("adresse");
+      adresse.firstElementChild.textContent = s.url || "";
+      adresse.title = s.url || "";
+      const ziel = document.getElementById("ziel");
+      ziel.textContent = s.target ? "Ziel im LV: " + s.target : s.hint || "";
+      ziel.title = ziel.textContent;
+      const status = document.getElementById("status");
+      status.textContent = s.status || "";
+      status.title = s.status || "";
+    }
+  };
+  window.ipc.postMessage("ready");
+</script>
+</body>
+</html>

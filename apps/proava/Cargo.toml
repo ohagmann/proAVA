@@ -1,0 +1,20 @@
+[package]
+name = "proava"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "proava"
+path = "src/main.rs"
+
+[dependencies]
+proava-application = { path = "../../crates/proava-application" }
+proava-infrastructure = { path = "../../crates/proava-infrastructure" }
+proava-exchange = { path = "../../crates/proava-exchange" }
+proava-ui = { path = "../../crates/proava-ui" }
+eframe.workspace = true
+
+[dev-dependencies]
+proava-domain = { path = "../../crates/proava-domain" }

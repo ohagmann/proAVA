@@ -1,0 +1,24 @@
+[package]
+name = "proava-exchange"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proava-domain = { path = "../proava-domain" }
+proava-application = { path = "../proava-application" }
+proava-gaeb = { path = "../proava-gaeb" }
+proava-print = { path = "../proava-print" }
+zip.workspace = true
+chrono.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+# Free memory before a big printout (GlobalMemoryStatusEx).
+windows-sys = { version = "0.61", features = ["Win32_System_SystemInformation"] }
+
+[dev-dependencies]
+proptest.workspace = true
+tempfile.workspace = true
+png = "0.18"
+proava-infrastructure = { path = "../proava-infrastructure" }

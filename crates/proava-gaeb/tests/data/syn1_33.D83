@@ -1,0 +1,55 @@
+00        83 V-2026-001                                       1122PPPPI90 000001
+01PrÅf-LV Rohbau und Ausbau               17.11.2615.12.2610:00           000002
+02Synthetisches PrÅf-LV proAVA                                            000003
+03Stadt Musterstadt                                                       000004
+08EUR   Euro                                                              000005
+20                                                                        000006
+26   Vorbemerkung: Alle Mengen sind VordersÑtze.                          000007
+1101       N    Titel                                                     000008
+12Rohbau                                                                  000009
+110101     N    Untertitel                                                000010
+12Erdarbeiten                                                             000011
+2101010010 NNN         00000125500m3                                      000012
+25Bodenaushub BK 3-5                                                      000013
+26   Boden lîsen, laden und abfahren, Bodenklasse 3-5.                    000014
+2101010020 NMN         00000010000St                                      000015
+25Bedarfsposition mit GB                                                  000016
+26   Bedarfsposition mit Gesamtbetrag.                                    000017
+2101010030 NEN         00000005000St                                      000018
+25Bedarfsposition ohne GB                                                 000019
+26   Bedarfsposition ohne Gesamtbetrag.                                   000020
+2101010040 GNN001      00000020000m                                       000021
+25Drainrohr DN 100                                                        000022
+26   Grundposition der Gruppe 1.                                          000023
+2101010050 ANN0011     00000020000m                                       000024
+25Drainrohr DN 150                                                        000025
+26   Wahlposition zu 0040.                                                000026
+2101010060ANNN         00000001000psch                                    000027
+25Baustelle einrichten                                                    000028
+26   Baustelleneinrichtung, Index A.                                      000029
+2101010060BNNN         00000001000psch                                    000030
+25Baustelle rÑumen                                                        000031
+26   Baustelle rÑumen, Index B.                                           000032
+310101                                                                    000033
+110102     N    Untertitel                                                000034
+12Stundenlohnarbeiten                                                     000035
+2101020010 SNN         00000008000h                                       000036
+25Facharbeiterstunde                                                      000037
+26   Facharbeiter auf Nachweis.                                           000038
+310102                                                                    000039
+3101                                                                      000040
+1102       N    Titel                                                     000041
+12Ausbau                                                                  000042
+110201     N    Untertitel                                                000043
+12BodenbelÑge                                                             000044
+2102010010 NNN         00000040000m2                                      000045
+25Bodenbelag                                                              000046
+26   Bodenbelag liefern und verlegen,                                     000047
+2631AFarbe 'grau'                                                         000048
+2661BFabrikat '....................'                                      000049
+2102010020 NNN         00000003000St                                      000050
+25BodentÅr mit Skizze                                                     000051
+26   BodentÅr nach Skizze:                                                000052
+310201                                                                    000053
+3102                                                                      000054
+99                                                                   00010000055

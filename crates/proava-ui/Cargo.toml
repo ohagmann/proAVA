@@ -1,0 +1,40 @@
+[package]
+name = "proava-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proava-domain = { path = "../proava-domain" }
+proava-application = { path = "../proava-application" }
+egui.workspace = true
+eframe.workspace = true
+image.workspace = true
+arboard.workspace = true
+proava-spell = { path = "../proava-spell" }
+# Absprache mit dem Browserfenster proava-web (nur serde_json; wry steckt
+# allein im Hilfsprogramm, eigener Workspace).
+proava-web-protocol = { path = "../proava-web-protocol" }
+# Absprache mit dem MCP-Server über die lokale Brücke (nur serde_json).
+proava-bridge-protocol = { path = "../proava-bridge-protocol" }
+# Fenster-Handle des Hauptfensters (über eframe ohnehin im Baum).
+raw-window-handle = "0.6"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# WM_TRANSIENT_FOR der Fenster „Eigenschaften“/„Langtext“ (owner_window.rs);
+# über winit ohnehin im Baum, hier die reine Rust-Verbindung ohne Features.
+x11rb = { version = "0.13", default-features = false }
+
+[target.'cfg(windows)'.dependencies]
+# ShellExecuteW: open PDFs, the manual and web addresses with the registered program.
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Console", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
+
+[dev-dependencies]
+proptest.workspace = true
+tempfile.workspace = true
+egui_kittest.workspace = true
+proava-infrastructure = { path = "../proava-infrastructure" }
+proava-exchange = { path = "../proava-exchange" }
+proava-gaeb = { path = "../proava-gaeb" }
+proava-print = { path = "../proava-print" }

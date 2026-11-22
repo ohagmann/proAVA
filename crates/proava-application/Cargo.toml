@@ -1,0 +1,13 @@
+[package]
+name = "proava-application"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proava-domain = { path = "../proava-domain" }
+proava-bridge-protocol = { path = "../proava-bridge-protocol" }
+
+[dev-dependencies]
+proptest.workspace = true

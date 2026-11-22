@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=proAVA
+GenericName=AVA – Ausschreibung, Vergabe, Abrechnung
+Comment=Leistungsverzeichnisse schreiben, GAEB austauschen, Angebote und Preisspiegel
+Exec=proava %f
+Icon=proava
+Terminal=false
+Categories=Office;Engineering;
+Keywords=AVA;GAEB;LV;Leistungsverzeichnis;Ausschreibung;Preisspiegel;
+MimeType=application/x-proava;application/x-gaeb-xml;application/x-gaeb90;text/csv;
+StartupWMClass=proava
+StartupNotify=true

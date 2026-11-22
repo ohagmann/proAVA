@@ -1,0 +1,28 @@
+[package]
+name = "proava-print"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+typst = "0.15.1"
+typst-layout = "0.15.1"
+typst-pdf = "0.15.1"
+# The layout loop of `typst::compile` with less memory (world.rs, `layout`):
+# evaluating the main file is this crate's job (part of Typst 0.15).
+typst-eval = "0.15.1"
+# Glyph advances for `keep-with-prices` (keep.rs); part of Typst 0.15, no
+# features of its own.
+ttf-parser = { version = "0.25.1", default-features = false }
+# PDF-Ausschnitte: Typst's own PDF rasterizer and its standard fonts (both
+# already part of Typst 0.15; Apache-2.0 OR MIT / Apache-2.0).
+hayro = { version = "0.7.1", default-features = false }
+typst-assets = "0.15.1"
+png = "0.18"
+# Geometry types of the rasterizer's device interface (same version as hayro).
+kurbo = "0.13.1"
+rust_decimal.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]

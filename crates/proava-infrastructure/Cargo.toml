@@ -1,0 +1,26 @@
+[package]
+name = "proava-infrastructure"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proava-domain = { path = "../proava-domain" }
+proava-application = { path = "../proava-application" }
+proava-bridge-protocol = { path = "../proava-bridge-protocol" }
+serde.workspace = true
+serde_json.workspace = true
+directories.workspace = true
+chrono.workspace = true
+quick-xml.workspace = true
+zip.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+# GetLogicalDrives: drive letters without touching (possibly slow) network drives;
+# OpenProcess & Co.: does the proAVA of a lock file still run?
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_IO", "Win32_System_Pipes", "Win32_System_Threading"] }
+
+[dev-dependencies]
+proptest.workspace = true
+tempfile.workspace = true
