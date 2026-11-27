@@ -1,12 +1,15 @@
-// Deckblatt der LV-Ausdrucke: Form „Standard“ und „Briefkopf“, dazu die
-// Folgeseite „Vertragsbedingungen“.
+// Deckblatt der LV-Ausdrucke: Formen „Standard“, „Briefkopf“, „Tabelle 1“ und
+// „Tabelle 2“, dazu die Folgeseite „Vertragsbedingungen“.
 //
 // ANPASSEN – alles Gestalterische des Deckblatts steht in diesem Abschnitt:
 //   cover-style       Schriftgrößen, Abstände, Logo-Größe
-//   cover-facts       Kenndaten der Form „Standard“: Reihenfolge und Beschriftung
+//   table-style       dazu für „Tabelle 1“ und „Tabelle 2“: Linien, Abstände
+//   cover-facts       Kenndaten der Formen „Standard“ und „Tabelle“: Reihenfolge und Beschriftung
 //   cover-box-facts   Kenndaten im Kasten der Form „Briefkopf“
 //   cover-body-facts  Kenndaten unter dem Titel der Form „Briefkopf“
 //   cover-addresses   Adressblöcke: Reihenfolge und Beschriftung
+//   cover-address-fields  Zeilen der Adresstabelle in „Tabelle 2“
+//   cover-measure-label   Beschriftung vor der Baumaßnahme
 //   cover-bidder      Texte des Bieterfelds (nur Angebotsaufforderung)
 // Die Schlüssel (z. B. "vergabenummer") liefert proAVA; leere Werte lassen
 // ihre Zeile weg. Welche Blöcke erscheinen (Logo, Adressen, Kenndaten,
@@ -31,6 +34,22 @@
   row-gap: 2.6mm,
   field-gap: 6.5mm,
   signature-space: 12mm,
+)
+
+// Formen „Tabelle 1“ (Adressen als Block je Beteiligtem) und „Tabelle 2“
+// (jedes Adressfeld eine Zeile): alle Angaben in voll umrandeten Tabellen,
+// Beschriftungen hinterlegt.
+#let table-style = (
+  project-size: 13pt,
+  top-space: 14mm,
+  after-title: 8mm,
+  table-gap: 5mm,
+  inset: (x: 2.5mm, y: 2.2mm),
+  stroke: 0.5pt + grid-ink,
+  head-size: 8.5pt,
+  label-width: 44mm, // Beschriftungsspalte aller Tabellen (fluchten untereinander)
+  bidder-rows: (11mm, 11mm, 7.5mm, 7.5mm, 7.5mm, 7.5mm),
+  signature-space: 10mm,
 )
 
 #let cover-facts = (
@@ -70,6 +89,18 @@
   ("planer", "Aufsteller / Planer", "Aufsteller / Planer"),
 )
 
+// (Schlüssel, Beschriftung); Zeilen, die bei allen Beteiligten leer sind, entfallen.
+#let cover-address-fields = (
+  ("name", "Name"),
+  ("zusatz", "Zusatz"),
+  ("strasse", "Straße"),
+  ("ort", "PLZ Ort"),
+  ("telefon", "Telefon"),
+  ("email", "E-Mail"),
+)
+
+#let cover-measure-label = "Baumaßnahme:"
+
 #let cover-bidder = (
   heading: "Vom Bieter auszufüllen",
   heading-letterhead: "Angaben des Bieters",
@@ -97,6 +128,13 @@
   let (key, label, alone) = entry
   if cover-lines(c, "auftraggeber").len() == 0 { alone } else { label }
 }
+
+// „Baumaßnahme: …“; weitere Zeilen stehen unter dem Text, nicht unter der Beschriftung.
+#let cover-measure(c) = grid(
+  columns: (auto, 1fr),
+  column-gutter: 0.4em,
+  text(fill: muted, cover-measure-label), text(fill: muted, c.measure.split("\n").join(linebreak())),
+)
 
 #let cover-fact-rows(c, list, label-size: none) = {
   let rows = ()
@@ -146,7 +184,7 @@
   }
   if c.measure != "" {
     v(3mm)
-    text(fill: muted, c.measure.split("\n").join(linebreak()))
+    cover-measure(c)
   }
   v(st.after-title)
   let blocks = cover-addresses.filter(e => cover-lines(c, e.at(0)).len() > 0)
@@ -235,10 +273,7 @@
   }
   v(3mm)
   if c.project != "" { text(size: st.project-size, c.project) }
-  if c.measure != "" {
-    linebreak()
-    text(fill: muted, c.measure.split("\n").join(linebreak()))
-  }
+  if c.measure != "" { cover-measure(c) }
   v(6mm)
   if c.blocks.facts {
     let rows = cover-fact-rows(c, cover-body-facts)
@@ -269,6 +304,104 @@
     )
     v(st.signature-space)
     cover-signatures(b.place-date, b.signature)
+  }
+}
+
+// Formen „Tabelle 1“ und „Tabelle 2“ (`by-field`): Titel wie „Standard“, dann
+// Adressen, Kenndaten und Bieterfeld in voll umrandeten Tabellen.
+#let cover-table(hd, c, by-field: false) = {
+  let st = cover-style
+  let ts = table-style
+  let label-cell(body) = table.cell(fill: title-fill, body)
+  let planner = cover-lines(c, "planer")
+  grid(
+    columns: (1fr, auto),
+    align: (left + bottom, right + top),
+    if c.blocks.addresses and planner.len() > 0 {
+      text(size: st.label-size + 1pt, fill: muted, planner.slice(0, calc.min(2, planner.len())).join(linebreak()))
+    },
+    cover-logo(hd, c),
+  )
+  v(ts.top-space)
+  if c.project != "" {
+    text(size: ts.project-size, weight: "bold", fill: heading, c.project)
+    v(2mm)
+  }
+  text(size: st.kind-size, weight: "bold", fill: heading, hd.kind)
+  if c.lv != "" {
+    v(1mm)
+    text(size: st.lv-size, c.lv)
+  }
+  if c.measure != "" {
+    v(3mm)
+    cover-measure(c)
+  }
+  v(ts.after-title)
+  let blocks = cover-addresses.filter(e => cover-lines(c, e.at(0)).len() > 0)
+  let role(e) = label-cell(text(size: ts.head-size, weight: "bold", fill: heading, cover-address-label(c, e)))
+  if c.blocks.addresses and blocks.len() > 0 {
+    if by-field {
+      // Je Beteiligtem eine Spalte, je Adressfeld eine Zeile.
+      let field(e, key) = c.address_fields.at(e.at(0), default: (:)).at(key, default: "")
+      let rows = cover-address-fields.filter(((key, _)) => blocks.any(e => field(e, key).trim() != ""))
+      table(
+        columns: (ts.label-width,) + blocks.map(_ => 1fr),
+        stroke: ts.stroke,
+        inset: ts.inset,
+        align: left + horizon,
+        label-cell([]),
+        ..blocks.map(role),
+        ..rows.map(((key, label)) => (label-cell(label), ..blocks.map(e => field(e, key)))).flatten(),
+      )
+    } else {
+      // Je Beteiligtem eine Spalte mit dem ganzen Adressblock.
+      table(
+        columns: blocks.map(_ => 1fr),
+        stroke: ts.stroke,
+        inset: ts.inset,
+        ..blocks.map(role),
+        ..blocks.map(e => cover-lines(c, e.at(0)).join(linebreak())),
+      )
+    }
+    v(ts.table-gap)
+  }
+  if c.blocks.facts {
+    let rows = ()
+    for (key, label) in cover-facts {
+      let value = cover-value(c, key)
+      if value.trim() != "" {
+        let shown = value.split("\n").join(linebreak())
+        rows.push(label-cell(label))
+        rows.push(if key in cover-strong { strong(shown) } else { shown })
+      }
+    }
+    if rows.len() > 0 {
+      table(columns: (ts.label-width, 1fr), stroke: ts.stroke, inset: ts.inset, align: left + horizon, ..rows)
+    }
+  }
+  v(1fr)
+  if c.bidder {
+    let b = cover-bidder
+    let amount = align(right + horizon, c.at("cur", default: "€"))
+    block(breakable: false, {
+      text(size: st.heading-size, weight: "bold", fill: heading, b.heading)
+      v(1mm)
+      table(
+        columns: (ts.label-width, 1fr),
+        rows: ts.bidder-rows,
+        stroke: ts.stroke,
+        inset: ts.inset,
+        align: (x, y) => if y < 2 { left + top } else { left + horizon },
+        label-cell(b.bidder), [],
+        label-cell(b.address), [],
+        label-cell(b.contact), [],
+        label-cell(b.net), amount,
+        label-cell(c.vat_label), amount,
+        label-cell(strong(b.gross)), amount,
+      )
+      v(ts.signature-space)
+      cover-signatures(b.place-date, b.signature)
+    })
   }
 }
 
@@ -307,7 +440,15 @@
   [#metadata("cover") <oa-cover>]
   bookmark-at(1, "Deckblatt")
   set text(size: cover-style.text-size)
-  if c.style == "letterhead" { cover-letterhead(hd, c) } else { cover-standard(hd, c) }
+  if c.style == "letterhead" {
+    cover-letterhead(hd, c)
+  } else if c.style == "table" {
+    cover-table(hd, c)
+  } else if c.style == "field-table" {
+    cover-table(hd, c, by-field: true)
+  } else {
+    cover-standard(hd, c)
+  }
   cover-terms(c)
   pagebreak()
 }

@@ -1102,9 +1102,11 @@ fn gaeb90_bids_comparison_and_pdf() {
         "Gitter ändert den Druck"
     );
 
-    // Deckblatt in der Form „Briefkopf“, ohne Deckblatt, falsche Form.
+    // Deckblatt in den Formen „Briefkopf“, „Tabelle 1“, „Tabelle 2“, ohne Deckblatt.
     for (form, file) in [
         ("briefkopf", "Vergabe_LV_mit_Preisen.pdf"),
+        ("tabelle1", "Vergabe_LV_mit_Preisen.pdf"),
+        ("tabelle2", "Vergabe_LV_mit_Preisen.pdf"),
         ("kein", "Vergabe_LV_mit_Preisen.pdf"),
     ] {
         let answer = ok(

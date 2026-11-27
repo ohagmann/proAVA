@@ -237,15 +237,26 @@ pub enum CoverForm {
     Standard,
     /// Like a letter: Vergabestelle top left, key facts in a box (Entwurf C).
     Letterhead,
+    /// Addresses (one block per party) and key facts in fully ruled tables.
+    Table,
+    /// Like [`CoverForm::Table`], each address field in a row of its own.
+    FieldTable,
 }
 
 impl CoverForm {
-    pub const ALL: [CoverForm; 2] = [CoverForm::Standard, CoverForm::Letterhead];
+    pub const ALL: [CoverForm; 4] = [
+        CoverForm::Standard,
+        CoverForm::Letterhead,
+        CoverForm::Table,
+        CoverForm::FieldTable,
+    ];
 
     pub fn key(self) -> &'static str {
         match self {
             CoverForm::Standard => "standard",
             CoverForm::Letterhead => "briefkopf",
+            CoverForm::Table => "tabelle1",
+            CoverForm::FieldTable => "tabelle2",
         }
     }
 
@@ -253,6 +264,8 @@ impl CoverForm {
         match self {
             CoverForm::Standard => "Standard",
             CoverForm::Letterhead => "Briefkopf",
+            CoverForm::Table => "Tabelle 1",
+            CoverForm::FieldTable => "Tabelle 2",
         }
     }
 
@@ -520,6 +533,8 @@ pub struct PrintSettings {
     pub performance: bool,
     /// Zusammenstellung at the end.
     pub summary: bool,
+    /// Zusammenstellung with the share of each title sum in % (column „Anteil“).
+    pub summary_share: bool,
     pub title_page_break: bool,
     pub landscape: bool,
     /// 9, 10 or 11.
@@ -529,7 +544,7 @@ pub struct PrintSettings {
     pub footer_text: String,
     /// Deckblatt with the project master data before the LV.
     pub cover: bool,
-    /// Its form (Standard or Briefkopf).
+    /// Its form (Standard, Briefkopf, Tabelle 1 or Tabelle 2).
     pub cover_form: CoverForm,
     /// Inhaltsverzeichnis with page numbers (also in the Zusammenstellung).
     pub contents: bool,
@@ -569,6 +584,7 @@ impl Default for PrintSettings {
             notes: true,
             performance: true,
             summary: true,
+            summary_share: true,
             title_page_break: false,
             landscape: false,
             font_size_pt: 9,
@@ -624,12 +640,13 @@ impl PrintSettings {
         let flag = |value: bool| if value { "1" } else { "0" };
         let clean = |text: &str| text.replace([';', '\n', '\r'], " ");
         format!(
-            "lang={};bild={};hinw={};ab={};zus={};seite={};quer={};deck={};deckform={};inh={};uebertrag={};preise={};stil={};me={};rahmen={};gitter={};kg={};lb={};diagramm={};anlagen={};kontrolle={};lzpos={};pt={};kopf={};fuss={}",
+            "lang={};bild={};hinw={};ab={};zus={};zusanteil={};seite={};quer={};deck={};deckform={};inh={};uebertrag={};preise={};stil={};me={};rahmen={};gitter={};kg={};lb={};diagramm={};anlagen={};kontrolle={};lzpos={};pt={};kopf={};fuss={}",
             flag(self.long_texts),
             flag(self.images),
             flag(self.notes),
             flag(self.performance),
             flag(self.summary),
+            flag(self.summary_share),
             flag(self.title_page_break),
             flag(self.landscape),
             flag(self.cover),
@@ -667,6 +684,7 @@ impl PrintSettings {
                 "hinw" => settings.notes = on,
                 "ab" => settings.performance = on,
                 "zus" => settings.summary = on,
+                "zusanteil" => settings.summary_share = on,
                 "seite" => settings.title_page_break = on,
                 "quer" => settings.landscape = on,
                 "deck" => settings.cover = on,
@@ -949,6 +967,21 @@ mod tests {
         );
         // Older lines without the key keep the default.
         assert!(PrintSettings::from_line(PrintKind::PricedLv, "lang=1").bookmark_positions);
+    }
+
+    #[test]
+    fn summary_share_is_on_and_round_trips() {
+        let mut settings = PrintSettings::defaults_for(PrintKind::PricedLv);
+        assert!(
+            settings.summary_share,
+            "Vorgabe: Anteil in der Zusammenstellung"
+        );
+        settings.summary_share = false;
+        let line = settings.to_line();
+        assert!(line.contains("zusanteil=0"), "{line}");
+        assert!(!PrintSettings::from_line(PrintKind::PricedLv, &line).summary_share);
+        // Lines stored before keep the default.
+        assert!(PrintSettings::from_line(PrintKind::PricedLv, "lang=1;zus=1").summary_share);
     }
 
     #[test]

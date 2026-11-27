@@ -828,6 +828,20 @@ fn cover_sheet_comes_first_with_multi_line_values() {
             ),
             ("planer".into(), vec!["Planungsbüro Beispiel".into()]),
         ],
+        address_fields: vec![
+            (
+                "bauherr".into(),
+                vec![
+                    ("name".into(), "Stadt #Musterstadt".into()),
+                    ("zusatz".into(), String::new()),
+                    ("strasse".into(), "Rathausplatz 1".into()),
+                ],
+            ),
+            (
+                "planer".into(),
+                vec![("name".into(), "Planungsbüro Beispiel".into())],
+            ),
+        ],
         sections: vec![
             CoverSection {
                 heading: "Sicherheiten".into(),
@@ -844,7 +858,12 @@ fn cover_sheet_comes_first_with_multi_line_values() {
         )],
         ..PrintCover::default()
     };
-    for style in [CoverStyle::Standard, CoverStyle::Letterhead] {
+    for style in [
+        CoverStyle::Standard,
+        CoverStyle::Letterhead,
+        CoverStyle::Table,
+        CoverStyle::FieldTable,
+    ] {
         lv.cover = Some(PrintCover {
             style,
             ..cover.clone()
@@ -854,10 +873,16 @@ fn cover_sheet_comes_first_with_multi_line_values() {
             .layout()
             .unwrap();
         let (first, _) = page_text(&document, 0);
+        // Tabelle 2: one row per address field with its label; rows empty
+        // for every party are left out.
+        let by_field = style == CoverStyle::FieldTable;
+        assert_eq!(first.contains("Straße"), by_field, "{style:?}: {first}");
+        assert!(!first.contains("Zusatz"), "{style:?}: {first}");
         for token in [
             "Angebotsaufforderung",
             "LV480Gebäudeautomation",
             "Neubau#Schule",
+            "Baumaßnahme:Neubau",
             "V-2026-0815",
             "15.12.2026,10:00Uhr",
             "Stadt#Musterstadt",
@@ -986,6 +1011,53 @@ fn document_text(document: &PagedDocument) -> String {
         out.push(' ');
     }
     out
+}
+
+#[test]
+fn share_of_a_title_sum_has_one_decimal() {
+    let dec = |text: &str| text.parse::<Decimal>().unwrap();
+    assert_eq!(
+        view::share_text(dec("104920.38"), dec("255885.28")),
+        "41,0 %"
+    );
+    assert_eq!(view::share_text(dec("1"), dec("3")), "33,3 %");
+    assert_eq!(view::share_text(dec("2"), dec("3")), "66,7 %");
+}
+
+#[test]
+fn summary_shows_the_share_of_each_title_unless_switched_off() {
+    let lv = sample_lv();
+    let text = |mode: LvPrintMode, options: &PrintOptions| {
+        document_text(&lv_world(&lv, mode, options).unwrap().layout().unwrap())
+    };
+    let priced = text(LvPrintMode::Priced, &PrintOptions::default());
+    assert!(priced.contains("Anteil"), "Spalte Anteil ab Werk: {priced}");
+    assert!(priced.contains('%'), "{priced}");
+    let off = text(
+        LvPrintMode::Priced,
+        &PrintOptions {
+            summary_share: false,
+            ..PrintOptions::default()
+        },
+    );
+    assert!(
+        off.contains("Zusammenstellung") && !off.contains("Anteil"),
+        "{off}"
+    );
+    let blank = text(LvPrintMode::Blank, &PrintOptions::default());
+    assert!(
+        !blank.contains("Anteil"),
+        "ohne Preise keine Anteile: {blank}"
+    );
+    // Summenblatt: the same column.
+    let sheet = text(
+        LvPrintMode::Priced,
+        &PrintOptions {
+            summary_only: true,
+            ..PrintOptions::default()
+        },
+    );
+    assert!(sheet.contains("Anteil"), "{sheet}");
 }
 
 #[test]
@@ -2719,6 +2791,26 @@ fn bookmark_lv() -> PrintLv {
         }),
         ..PrintLv::default()
     }
+}
+
+#[test]
+fn contents_entries_are_links_to_their_titles() {
+    let lv = bookmark_lv();
+    let pdf = |contents: bool| {
+        let options = PrintOptions {
+            contents,
+            ..PrintOptions::default()
+        };
+        let world = lv_world(&lv, LvPrintMode::Priced, &options).unwrap();
+        let document = world.layout().unwrap();
+        world.pdf(&document).unwrap()
+    };
+    let links = |bytes: &[u8]| bytes.windows(5).filter(|w| w == b"/Link").count();
+    // Three titles and the Zusammenstellung in the Inhaltsverzeichnis, the
+    // page numbers in the Zusammenstellung: every one a link.
+    let with = links(&pdf(true));
+    assert!(with >= 3 + 1 + 3, "Links im Inhaltsverzeichnis: {with}");
+    assert_eq!(links(&pdf(false)), 0, "ohne Inhaltsverzeichnis keine Links");
 }
 
 #[test]

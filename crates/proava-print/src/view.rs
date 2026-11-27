@@ -306,6 +306,14 @@ fn position_codes(position: &PrintPosition) -> Vec<String> {
 }
 
 /// Percentage as printed: „5 %“, „3,5 %“.
+/// Share of `part` in `whole` with one decimal, e.g. „41,0 %“.
+pub(crate) fn share_text(part: Decimal, whole: Decimal) -> String {
+    format!(
+        "{} %",
+        crate::format::number(part * Decimal::ONE_HUNDRED / whole, 1)
+    )
+}
+
 fn percent_text(percent: Decimal) -> String {
     let places = percent.normalize().scale().min(6);
     format!("{} %", crate::format::number(percent, places))
@@ -345,6 +353,9 @@ struct LvBuilder<'a> {
     files: &'a mut Files,
     rows: Vec<Value>,
     summary: Vec<Value>,
+    /// Sum of each Zusammenstellung entry (priced, not „Nur Textinformation“):
+    /// the base of its share, filled in once the net total is known.
+    summary_totals: Vec<Option<Decimal>>,
     /// Rows split at every top-level title (for „neuer Titel auf neuer Seite“).
     chunks: Vec<Vec<Value>>,
     split: bool,
@@ -389,6 +400,8 @@ impl LvBuilder<'_> {
                         "text": breakable(&title.text), "sum": sum, "text_only": text_only,
                         "lump": title.lump,
                     }));
+                    self.summary_totals
+                        .push((self.priced && !text_only).then(|| title_total(title)));
                     self.items(&title.items, level + 1);
                     self.rows.push(json!({
                         "t": "sum", "level": level, "oz": title.oz, "text": breakable(&title.text), "sum": sum,
@@ -526,6 +539,7 @@ pub fn lv(lv: &PrintLv, mode: LvPrintMode, options: &PrintOptions, files: &mut F
         files,
         rows: Vec::new(),
         summary: Vec::new(),
+        summary_totals: Vec::new(),
         chunks: Vec::new(),
         split: options.title_page_break,
         title_count: 0,
@@ -543,6 +557,14 @@ pub fn lv(lv: &PrintLv, mode: LvPrintMode, options: &PrintOptions, files: &mut F
     }
 
     let net = lv.net_total.unwrap_or_else(|| items_total(&lv.items));
+    // Column „Anteil“ of the Zusammenstellung: each title sum in % of the net total.
+    if options.summary_share && !net.is_zero() {
+        for (entry, total) in builder.summary.iter_mut().zip(&builder.summary_totals) {
+            if let Some(total) = total {
+                entry["share"] = json!(share_text(*total, net));
+            }
+        }
+    }
     let discount = lv
         .discount
         .as_ref()
@@ -627,10 +649,24 @@ fn cover_json(
         })
         .filter(|(_, lines)| lines.as_array().is_some_and(|lines| !lines.is_empty()))
         .collect();
+    let address_fields: serde_json::Map<String, Value> = cover
+        .address_fields
+        .iter()
+        .map(|(key, fields)| {
+            let fields: serde_json::Map<String, Value> = fields
+                .iter()
+                .filter(|(_, value)| !value.trim().is_empty())
+                .map(|(name, value)| (name.clone(), Value::String(breakable(value.trim()))))
+                .collect();
+            (key.clone(), Value::Object(fields))
+        })
+        .collect();
     json!({
         "style": match cover.style {
             CoverStyle::Standard => "standard",
             CoverStyle::Letterhead => "letterhead",
+            CoverStyle::Table => "table",
+            CoverStyle::FieldTable => "field-table",
         },
         "blocks": {
             "logo": cover.blocks.logo,
@@ -646,6 +682,7 @@ fn cover_json(
         "measure": cover.measure.trim(),
         "facts": facts,
         "addresses": addresses,
+        "address_fields": address_fields,
         "sections": cover.sections.iter().filter(|section| !section.rows.is_empty()).map(|section| json!({
             "heading": section.heading,
             "rows": section.rows.iter().map(|(label, text)| json!({

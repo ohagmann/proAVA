@@ -472,6 +472,7 @@ pub(crate) fn print_pdf(server: &mut Server, args: &Args) -> Result<String, Stri
         ("hinweise", &mut settings.notes),
         ("ausfuehrungsbeschreibungen", &mut settings.performance),
         ("zusammenstellung", &mut settings.summary),
+        ("anteil", &mut settings.summary_share),
         ("titel_neue_seite", &mut settings.title_page_break),
         ("quer", &mut settings.landscape),
         ("inhaltsverzeichnis", &mut settings.contents),
@@ -501,14 +502,14 @@ pub(crate) fn print_pdf(server: &mut Server, args: &Args) -> Result<String, Stri
                 .ok_or_else(|| format!("stil: „{}“ – bitte klassisch oder proava.", text.trim()))?,
         );
     }
-    // deckblatt: true/false or the form („standard“, „briefkopf“, „kein“).
+    // deckblatt: true/false or the form („standard“, „briefkopf“, „tabelle1“, „tabelle2“, „kein“).
     match args.opt_text("deckblatt").ok().flatten() {
         Some(text) => match text.trim().to_lowercase().as_str() {
             "kein" | "ohne" | "nein" | "false" => settings.cover = false,
             "ja" | "true" => settings.cover = true,
             other => {
                 settings.cover_form = proava_application::CoverForm::from_key(other)
-                    .ok_or_else(|| format!("deckblatt: „{other}“ – bitte standard, briefkopf, kein oder true/false."))?;
+                    .ok_or_else(|| format!("deckblatt: „{other}“ – bitte standard, briefkopf, tabelle1, tabelle2, kein oder true/false."))?;
                 settings.cover = true;
             }
         },

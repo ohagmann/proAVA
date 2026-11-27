@@ -311,7 +311,8 @@
   (weight: "bold", size: if r.t != "title" { 9pt } else if r.level == 1 { 10.5pt } else { 9.5pt }),
 )) + if has-performance { ((performance-word, (size: 7pt)),) } else { () }
 
-// Inhaltsverzeichnis with the page of every title (from the title metadata).
+// Inhaltsverzeichnis with the page of every title (from the title metadata)
+// and its place for the link: (value, page, location).
 #let title-pages() = {
   let seen = ()
   let found = ()
@@ -319,7 +320,7 @@
     let key = m.value.oz + "|" + m.value.text
     if key not in seen {
       seen.push(key)
-      found.push((m.value, m.location().page()))
+      found.push((m.value, m.location().page(), m.location()))
     }
   }
   found
@@ -331,10 +332,10 @@
   v(4mm)
   context {
     let entries = title-pages()
-    let summary-page = query(<oa-summary>).map(m => m.location().page()).first(default: none)
-    let oz-w = oz-column-width(entries.map(((v, _)) => (v.oz, (weight: "bold"))), min: 14mm)
+    let summary = query(<oa-summary>).map(m => m.location()).first(default: none)
+    let oz-w = oz-column-width(entries.map(((v, ..)) => (v.oz, (weight: "bold"))), min: 14mm)
     table(
-      columns: (oz-w + 4mm * calc.max(0, ..entries.map(((v, _)) => v.level - 1)), auto, 1fr, 12mm),
+      columns: (oz-w + 4mm * calc.max(0, ..entries.map(((v, ..)) => v.level - 1)), auto, 1fr, 12mm),
       // Separator above each row (none at the page bottom, see lv-rows).
       stroke: table-stroke(off: (_, y) => if y > 1 { (top: thin) }),
       inset: (x: 3pt, y: 3.2pt),
@@ -342,18 +343,20 @@
         head-cell("Nr."), head-cell(""), head-cell("Bezeichnung"), head-cell("Seite", align: right),
         table.hline(stroke: 1pt + accent-rule),
       ),
-      ..entries.map(((v, page)) => {
+      // Every entry is a link to its title in the PDF.
+      ..entries.map(((v, page, place)) => {
         let top = v.level == 1
-        let style(body) = if top { strong(body) } else { body }
+        let style(body) = link(place, if top { strong(body) } else { body })
         (
           pad(left: (v.level - 1) * 4mm, style(v.oz)),
-          text(fill: muted, v.label),
+          link(place, text(fill: muted, v.label)),
           style(v.text),
           table.cell(align: right, style(str(page))),
         )
       }).flatten(),
-      ..if summary-page != none {
-        ([], [], strong("Zusammenstellung"), table.cell(align: right, strong(str(summary-page))))
+      ..if summary != none {
+        let style(body) = link(summary, strong(body))
+        ([], [], style("Zusammenstellung"), table.cell(align: right, style(str(summary.page()))))
       } else { () },
     )
   }
@@ -395,14 +398,18 @@
     bookmark-at(1, "Zusammenstellung")
   }
   let with-pages = opt.at("contents", default: false) and not opt.summary_only
+  // Column „Anteil“: each title sum in % of the net total (print option),
+  // left of „Betrag“ – the amounts stay right, under the GP and above the totals.
+  let with-share = data.summary.any(s => s.at("share", default: none) != none)
   context {
     let pages = if with-pages { title-pages() } else { () }
-    let page-of(s) = pages.find(((v, _)) => v.oz == s.oz and v.text == s.text)
+    let page-of(s) = pages.find(((v, ..)) => v.oz == s.oz and v.text == s.text)
     table(
       columns: (
         oz-column-width(data.summary.map(s => (s.oz, (weight: "bold"))), min: 18mm) + 4mm * calc.max(0, ..data.summary.map(s => s.level - 1)),
         1fr,
         ..if with-pages { (12mm,) } else { () },
+        ..if with-share { (16mm,) } else { () },
         35mm,
       ),
       stroke: table-stroke(off: (_, y) => if y > 1 { (top: thin) }),
@@ -411,6 +418,7 @@
         head-cell("OZ"),
         head-cell("Bezeichnung"),
         ..if with-pages { (head-cell("Seite", align: right),) } else { () },
+        ..if with-share { (head-cell("Anteil", align: right),) } else { () },
         head-cell("Betrag " + cur, align: right),
         table.hline(stroke: 1pt + accent-rule),
       ),
@@ -426,9 +434,18 @@
           }),
           ..if with-pages {
             let found = page-of(s)
-            (table.cell(align: right, text(fill: muted, if found == none { "" } else { str(found.at(1)) })),)
+            // The page number jumps to the title.
+            (table.cell(align: right, if found == none { [] } else { link(found.at(2), text(fill: muted, str(found.at(1)))) }),)
           } else { () },
-          table.cell(align: right, sum-amount(s, bold: s.level == 1)),
+          ..if with-share {
+            let share = s.at("share", default: none)
+            (table.cell(align: right, if share == none { [] } else { bold(share) }),)
+          } else { () },
+          table.cell(align: right, {
+            sum-amount(s, bold: s.level == 1)
+            // Room of „ €“ as in the totals below: the digits stand under each other.
+            if priced { hide(" " + cur) }
+          }),
         )
       }).flatten(),
     )

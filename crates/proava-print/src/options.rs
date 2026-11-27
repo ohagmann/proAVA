@@ -15,6 +15,9 @@ pub struct PrintOptions {
     pub summary: bool,
     /// Only the Zusammenstellung with the totals, no positions (Summenblatt).
     pub summary_only: bool,
+    /// Zusammenstellung with the share of each title sum in the net total
+    /// (column „Anteil“, priced printouts only).
+    pub summary_share: bool,
     /// Free text in the page header of every page, e.g. „Vorabzug“.
     pub header_text: String,
     /// Free text in the page footer of every page.
@@ -38,6 +41,7 @@ impl Default for PrintOptions {
             title_page_break: false,
             summary: true,
             summary_only: false,
+            summary_share: true,
             header_text: String::new(),
             footer_text: String::new(),
             contents: false,

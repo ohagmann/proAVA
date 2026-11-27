@@ -673,7 +673,7 @@ fn setting_label(key: &str) -> String {
         "default_folder" => "Standardordner".into(),
         "detail_side" | "detail_width" => "Eigenschaftenfenster".into(),
         "column_widths" => "Spaltenbreiten".into(),
-        "table_columns" => "Tabellenspalten KG/LB".into(),
+        "table_columns" => "Tabellenspalten KG/LB, Anteil der Titelsummen".into(),
         "print" => "Druckeinstellungen".into(),
         "long_text_window" => "Größe des Langtextfensters".into(),
         "transfer_sources" => "Übernahme-Quellen".into(),

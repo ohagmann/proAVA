@@ -270,6 +270,10 @@ pub(crate) fn layout(active: usize) -> Vec<(&'static str, Vec<MenuItem>)> {
                     ShellAction::Editor(Command::ToggleWorkCategoryColumn),
                 ),
                 Check(
+                    crate::lv_editor::TITLE_SHARE_LABEL,
+                    ShellAction::Editor(Command::ToggleTitleShare),
+                ),
+                Check(
                     "Bibliothek anzeigen",
                     ShellAction::Library(LibraryCommand::Toggle),
                 ),
@@ -307,6 +311,7 @@ struct MenuState {
     detail_visible: bool,
     cost_group_column: bool,
     work_category_column: bool,
+    title_share: bool,
     library_visible: bool,
     tab: Tab,
     printable: Vec<(PrintKind, bool)>,
@@ -347,6 +352,7 @@ impl MenuState {
             ShellAction::DetailSide(side) => self.side == side,
             ShellAction::Editor(Command::ToggleCostGroupColumn) => self.cost_group_column,
             ShellAction::Editor(Command::ToggleWorkCategoryColumn) => self.work_category_column,
+            ShellAction::Editor(Command::ToggleTitleShare) => self.title_share,
             ShellAction::Library(LibraryCommand::Toggle) => self.library_visible,
             ShellAction::ShowTab(tab) => self.tab == tab,
             _ => false,
@@ -366,6 +372,7 @@ impl WorkspaceScreen {
             detail_visible: self.preferences.detail_visible,
             cost_group_column: self.editor.column_shown(Column::CostGroup),
             work_category_column: self.editor.column_shown(Column::WorkCategory),
+            title_share: self.editor.title_share_shown(),
             library_visible: self.launcher.library_panel(),
             tab: self.tab,
             printable: PrintKind::ALL

@@ -447,6 +447,10 @@ pub enum CoverStyle {
     Standard,
     /// Like a letter: Vergabestelle top left, key facts in a box on the right.
     Letterhead,
+    /// Addresses (one block per party) and facts in fully ruled tables.
+    Table,
+    /// Like [`CoverStyle::Table`], each address field in a row of its own.
+    FieldTable,
 }
 
 /// Which blocks the Deckblatt shows.
@@ -488,6 +492,9 @@ pub struct PrintCover {
     pub facts: Vec<(String, String)>,
     /// Address blocks by key (bauherr, auftraggeber, planer) with their lines.
     pub addresses: Vec<(String, Vec<String>)>,
+    /// The same addresses field by field for [`CoverStyle::FieldTable`]:
+    /// name, zusatz, strasse, ort, telefon, email.
+    pub address_fields: Vec<(String, Vec<(String, String)>)>,
     /// Folgeseite „Vertragsbedingungen“: sections of label/value lines.
     pub sections: Vec<CoverSection>,
     /// Free text under the sections (Zahlungsbedingungen, weitere Vereinbarungen …).

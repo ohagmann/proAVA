@@ -136,6 +136,8 @@ pub struct OtherLvs {
 pub struct OtherLv {
     pub depths: Vec<usize>,
     pub totals: Vec<GroupTotal>,
+    /// Net total: the base of the share of the title sums.
+    pub net_total: proava_domain::Money,
     /// Zuschläge, Rechengrundlage and Aufteilungsblöcke.
     pub surcharges: SurchargeComputation,
 }
@@ -150,6 +152,7 @@ impl OtherLvs {
         Some(self.lvs.entry(lv).or_insert_with(|| OtherLv {
             depths: super::depths(data),
             totals: data.group_totals(),
+            net_total: data.net_total(),
             surcharges: data.split_computation(),
         }))
     }

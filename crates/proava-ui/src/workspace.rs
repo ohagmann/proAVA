@@ -304,6 +304,7 @@ pub(crate) fn palette_actions() -> Vec<ShellAction> {
         ShellAction::Editor(Command::CostGroups),
         ShellAction::Editor(Command::ToggleCostGroupColumn),
         ShellAction::Editor(Command::ToggleWorkCategoryColumn),
+        ShellAction::Editor(Command::ToggleTitleShare),
     ];
     actions.extend(StatusFilter::ALL.map(|filter| ShellAction::Editor(Command::Filter(filter))));
     actions.extend([
@@ -943,6 +944,11 @@ impl WorkspaceScreen {
     /// Whether a column of the LV table is switched on (KG, LB; for tests).
     pub fn column_shown(&self, column: Column) -> bool {
         self.editor.column_shown(column)
+    }
+
+    /// Whether the title rows show their share of the LV total (Ansicht; for tests).
+    pub fn title_share_shown(&self) -> bool {
+        self.editor.title_share_shown()
     }
 
     /// Whether the Eigenschaftenfenster is shown (Ansicht, Strg+E; for tests).

@@ -94,6 +94,8 @@ pub enum Command {
     ToggleCostGroupColumn,
     /// Table column „LB“ (Leistungsbereich) on/off.
     ToggleWorkCategoryColumn,
+    /// Share of each title sum in the LV total (EP column of the titles) on/off.
+    ToggleTitleShare,
 }
 
 impl Command {
@@ -160,6 +162,7 @@ impl Command {
             Command::CostGroups => "Kosten nach Kostengruppen …",
             Command::ToggleCostGroupColumn => "Spalte KG (Kostengruppe) ein/aus",
             Command::ToggleWorkCategoryColumn => "Spalte LB (Leistungsbereich) ein/aus",
+            Command::ToggleTitleShare => "Anteil der Titelsummen in % ein/aus",
         }
     }
 
@@ -221,7 +224,8 @@ impl Command {
             Command::OpenPoints => "Strg+Umschalt+P",
             Command::CostGroups
             | Command::ToggleCostGroupColumn
-            | Command::ToggleWorkCategoryColumn => "",
+            | Command::ToggleWorkCategoryColumn
+            | Command::ToggleTitleShare => "",
         }
     }
 }

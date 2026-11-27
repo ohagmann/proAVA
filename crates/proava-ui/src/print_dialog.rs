@@ -422,6 +422,20 @@ impl PrintDialog {
                     }
                     ui.add_enabled_ui(self.kind != PrintKind::Summary, |ui| {
                         ui.checkbox(&mut settings.summary, "Zusammenstellung am Ende");
+                    });
+                    // Column „Anteil“: only where the Zusammenstellung has sums.
+                    ui.add_enabled_ui(
+                        (settings.summary || self.kind == PrintKind::Summary)
+                            && self.kind != PrintKind::RequestForQuotation,
+                        |ui| {
+                            ui.horizontal(|ui| {
+                                ui.add_space(18.0);
+                                ui.checkbox(&mut settings.summary_share, "mit Anteil der Titelsummen in %")
+                                    .on_hover_text("Spalte „Anteil“: jede Titelsumme in Prozent der Summe netto");
+                            });
+                        },
+                    );
+                    ui.add_enabled_ui(self.kind != PrintKind::Summary, |ui| {
                         ui.checkbox(&mut settings.title_page_break, "Neuer Titel auf neuer Seite");
                         ui.checkbox(&mut settings.contents, "Inhaltsverzeichnis mit Seitenzahlen");
                         ui.checkbox(&mut settings.carry, "Übertrag am Seitenende und -anfang");
@@ -446,7 +460,9 @@ impl PrintDialog {
                     .response
                     .on_hover_text(
                         "Standard: klar gegliedert, Bieterfeld unten. Briefkopf: Vergabestelle oben links, \
-                         Kenndaten im Kasten. Die Vertragsbedingungen folgen auf einer eigenen Seite.",
+                         Kenndaten im Kasten. Tabelle 1: Adressen und Kenndaten in umrandeten Tabellen. \
+                         Tabelle 2: wie Tabelle 1, jedes Adressfeld in einer eigenen Zeile. \
+                         Die Vertragsbedingungen folgen auf einer eigenen Seite.",
                     );
                     ui.add_space(6.0);
                     heading(ui, palette, "Bereich");

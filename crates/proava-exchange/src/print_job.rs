@@ -210,6 +210,7 @@ fn options(job: &PrintJob) -> PrintOptions {
         title_page_break: settings.title_page_break,
         summary: settings.summary,
         summary_only: job.kind == PrintKind::Summary,
+        summary_share: settings.summary_share,
         header_text: settings.header_text.clone(),
         footer_text: settings.footer_text.clone(),
         contents: settings.contents && job.kind != PrintKind::Summary,
@@ -520,6 +521,8 @@ pub fn render_print_within(
         let style = match job.settings.cover_form {
             proava_application::CoverForm::Standard => proava_print::CoverStyle::Standard,
             proava_application::CoverForm::Letterhead => proava_print::CoverStyle::Letterhead,
+            proava_application::CoverForm::Table => proava_print::CoverStyle::Table,
+            proava_application::CoverForm::FieldTable => proava_print::CoverStyle::FieldTable,
         };
         let blocks = proava_print::CoverBlocks {
             logo: job.cover_blocks.logo,

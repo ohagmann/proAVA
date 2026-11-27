@@ -53,13 +53,13 @@
 #let high-text = if classic { black } else { rgb("#9b1c1c") }
 #let missing-text = if classic { black } else { rgb("#b45309") }
 // Blattrahmen (Druckdialog je Dokumentart, Vorgabe in den Einstellungen):
-// Lage der Linie zum Blattrand, Abstand des Textes zur Linie, Strichstärken.
+// Lage der Linie zum Blattrand, Abstand des Textes zur Linie, Strichstärken;
+// Kopf- und Fußzeile stehen senkrecht mittig in ihrem Feld.
 #let border-style = (
   edge: 10mm,                 // oben, rechts, unten
   edge-left: 20mm,            // links (Heftrand), A4 hoch
   edge-left-landscape: 15mm,  // links, quer
   inset: 5mm,                 // Text zur senkrechten Linie
-  text-top: 3mm,              // Text zur Linie über ihm (Rahmen, Trennlinie)
   gap: 4mm,                   // Trennlinie Kopf/Fuß zum Inhalt
   thin: 0.5pt,
   medium: 1pt,
@@ -349,17 +349,20 @@
   // The cover sheet (cover.typ) has no page header.
   let on-cover = query(<oa-cover>).any(m => m.location().page() == here().page())
   if bordered and not on-cover {
-    // Blattrahmen: the header fills its zone, the separator runs from frame
-    // line to frame line.
+    // Blattrahmen: the header fills its zone, its text sits in the middle
+    // between frame line and separator; the separator runs from frame line
+    // to frame line.
     let b = border-style
-    block(height: border-zone(f), width: 100%, inset: (top: b.text-top), align(top, {
-      set text(size: f.size * 1pt, fill: frame-ink)
-      set block(spacing: 0pt)
-      oa-frame-row(f.head, f, hd, (i, j) => if i == 1 and j == 0 { (weight: "bold", fill: heading) } else if i == 1 {
-        (fill: heading)
-      } else { (:) }, at-top: true, with-logo: true)
+    block(height: border-zone(f), width: 100%, {
       place(bottom + left, dx: -b.inset, line(length: 100% + 2 * b.inset, stroke: border-stroke))
-    }))
+      align(horizon, {
+        set text(size: f.size * 1pt, fill: frame-ink)
+        set block(spacing: 0pt)
+        oa-frame-row(f.head, f, hd, (i, j) => if i == 1 and j == 0 { (weight: "bold", fill: heading) } else if i == 1 {
+          (fill: heading)
+        } else { (:) }, at-top: true, with-logo: true)
+      })
+    })
   } else if not on-cover {
     set text(size: f.size * 1pt, fill: frame-ink)
     set block(spacing: 0pt)
@@ -380,12 +383,13 @@
   set text(size: f.size * 1pt, fill: frame-ink)
   set block(spacing: 0pt)
   if bordered {
-    // Like without the frame, the footer is on the cover sheet as well.
+    // Like without the frame, the footer is on the cover sheet as well; its
+    // text sits in the middle between separator and frame line.
     let b = border-style
-    block(height: border-zone(f), width: 100%, inset: (top: b.text-top), align(top, {
-      place(top + left, dx: -b.inset, dy: -b.text-top, line(length: 100% + 2 * b.inset, stroke: border-stroke))
-      oa-frame-row(f.foot, f, hd, (i, j) => (:), at-top: true)
-    }))
+    block(height: border-zone(f), width: 100%, {
+      place(top + left, dx: -b.inset, line(length: 100% + 2 * b.inset, stroke: border-stroke))
+      align(horizon, oa-frame-row(f.foot, f, hd, (i, j) => (:), at-top: true))
+    })
   } else {
     if f.foot_rule {
       line(length: 100%, stroke: thin)

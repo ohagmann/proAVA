@@ -52,6 +52,10 @@ const HEADER_HEIGHT: f32 = 26.0;
 const OZ_GAP: f32 = 10.0;
 /// Name of the table head for screen readers and UI tests.
 pub const HEADER_NAME: &str = "Spaltenkopf der LV-Tabelle";
+/// Switch (menu Ansicht, menu of the table head) for the share of the title sums.
+pub const TITLE_SHARE_LABEL: &str = "Anteil der Titelsummen in %";
+/// Key of that switch in the settings (next to the columns „KG“ and „LB“).
+const TITLE_SHARE_KEY: &str = "anteil";
 const DETAIL_WIDTH: f32 = 420.0;
 const MIN_DETAIL_WIDTH: f32 = 260.0;
 const MIN_TABLE_WIDTH: f32 = 320.0;
@@ -341,6 +345,11 @@ pub struct LvEditor {
     /// A menu switched a table column („KG“, „LB“) on or off; stored in the
     /// settings in the next frame.
     column_toggle: Option<(Column, bool)>,
+    /// Share of each title sum in the LV net total, in the EP column of the
+    /// title rows (copy of the setting).
+    show_share: bool,
+    /// The menu asked to flip [`Self::show_share`]; written in the next frame.
+    toggle_share: bool,
     /// Editing in the table cells.
     cells: table_cells::CellState,
     /// The open project is a Positionsbibliothek (Stichwörter, Stand, Preisdatum).
@@ -438,6 +447,8 @@ impl LvEditor {
             cost_group_input: None,
             cost_groups_open: false,
             column_toggle: None,
+            show_share: false,
+            toggle_share: false,
             cells: table_cells::CellState::default(),
             library_mode: false,
             today_iso: String::new(),
@@ -458,6 +469,23 @@ impl LvEditor {
     /// Whether a table column is switched on (for the menus and tests).
     pub fn column_shown(&self, column: Column) -> bool {
         self.widths.shown(column)
+    }
+
+    /// Whether the title rows show their share of the LV total (menus, tests).
+    pub fn title_share_shown(&self) -> bool {
+        self.show_share
+    }
+
+    /// Switches the share of the title sums on or off (remembered in the
+    /// settings in the next frame); the message for the status line.
+    fn toggle_title_share(&mut self) -> String {
+        self.toggle_share = !self.toggle_share;
+        self.show_share = !self.show_share;
+        if self.show_share {
+            "Anteil der Titelsummen an der LV-Summe netto an.".to_string()
+        } else {
+            "Anteil der Titelsummen aus.".to_string()
+        }
     }
 
     /// Switches „KG“ or „LB“ on or off (remembered in the settings); the
@@ -1089,6 +1117,14 @@ impl LvEditor {
                 launcher.table_column(column.key(), column.shown_by_default()),
             );
         }
+        // Share of the title sums: like the columns, remembered (default off).
+        if std::mem::take(&mut self.toggle_share) {
+            launcher.set_table_column(
+                TITLE_SHARE_KEY,
+                !launcher.table_column(TITLE_SHARE_KEY, false),
+            );
+        }
+        self.show_share = launcher.table_column(TITLE_SHARE_KEY, false);
         // Width of the longest OZ (or „A0003“) of all LVs in the table: a
         // narrow table shrinks the OZ column to it before it drops Einheit or EP.
         let longest = multi_lv::shown(project)
@@ -1418,7 +1454,8 @@ impl LvEditor {
                 | Command::OpenPoints
                 | Command::CostGroups
                 | Command::ToggleCostGroupColumn
-                | Command::ToggleWorkCategoryColumn => {}
+                | Command::ToggleWorkCategoryColumn
+                | Command::ToggleTitleShare => {}
                 _ => self.marked.clear(),
             }
         }
@@ -1848,6 +1885,9 @@ impl LvEditor {
             }
             Command::ToggleWorkCategoryColumn => {
                 output.toast = Some(self.toggle_column(Column::WorkCategory));
+            }
+            Command::ToggleTitleShare => {
+                output.toast = Some(self.toggle_title_share());
             }
             Command::OpenPoints => {
                 self.open_points = match self.open_points.take() {
@@ -4078,6 +4118,11 @@ impl LvEditor {
                 ui.close();
             }
         }
+        let mut share = self.show_share;
+        if ui.checkbox(&mut share, TITLE_SHARE_LABEL).clicked() {
+            toast = Some(self.toggle_title_share());
+            ui.close();
+        }
         ui.separator();
         if ui.button("Spaltenbreiten zurücksetzen").clicked() {
             for column in Column::ALL {
@@ -4099,6 +4144,7 @@ impl LvEditor {
         output: &mut EditorOutput,
     ) {
         let lv_snapshot_totals = project.lv().group_totals();
+        let lv_snapshot_net = project.lv().net_total();
         let lv_snapshot_surcharges = project.lv().split_computation();
         egui::CentralPanel::default()
             .frame(
@@ -4403,6 +4449,8 @@ impl LvEditor {
                                         lv: data,
                                         depths: &other.depths,
                                         totals: &other.totals,
+                                        net_total: other.net_total,
+                                        show_share: self.show_share,
                                         surcharges: &other.surcharges,
                                         collapsed: titles,
                                         hits: other_hits.get(&lv).unwrap_or(&no_hits),
@@ -4490,6 +4538,8 @@ impl LvEditor {
                                 lv: project.lv(),
                                 depths: &depths,
                                 totals: &lv_snapshot_totals,
+                                net_total: lv_snapshot_net,
+                                show_share: self.show_share,
                                 surcharges: &lv_snapshot_surcharges,
                                 collapsed: &self.collapsed,
                                 hits: &hits,
@@ -5373,6 +5423,10 @@ struct LvPaint<'a> {
     lv: &'a Lv,
     depths: &'a [usize],
     totals: &'a [proava_domain::GroupTotal],
+    /// Net total of the LV: the base of the share of the title sums.
+    net_total: Money,
+    /// Show that share in the title rows.
+    show_share: bool,
     /// Zuschläge with Rechengrundlage and Aufteilungsblöcke (planner).
     surcharges: &'a proava_domain::SurchargeComputation,
     collapsed: &'a HashSet<RowId>,
@@ -5392,6 +5446,11 @@ impl LvPaint<'_> {
         let lv = self.lv;
         let row = &lv.rows()[index];
         let collapsed = self.collapsed.contains(&row.id());
+        let total = self
+            .totals
+            .iter()
+            .find(|total| total.group_row == index)
+            .map(|total| total.total);
         RowInfo {
             depth: self.depths[index],
             selected,
@@ -5405,11 +5464,10 @@ impl LvPaint<'_> {
             } else {
                 0
             },
-            total: self
-                .totals
-                .iter()
-                .find(|total| total.group_row == index)
-                .map(|total| total.total),
+            total,
+            share: total
+                .filter(|_| self.show_share)
+                .and_then(|total| title_share(total, self.net_total)),
             surcharge: self.surcharges.values.get(&row.id()).copied(),
             basis: self.surcharges.bases.contains(&row.id()),
             // Under the last line of a block of Aufteilungszeilen: its sum.
@@ -5487,6 +5545,8 @@ struct RowInfo {
     collapsed: bool,
     hidden: usize,
     total: Option<Money>,
+    /// Title rows with the switch on: share of the LV net total („41,0 %“).
+    share: Option<String>,
     /// Zuschlagsposition: Bezugssumme and amount (shown instead of Menge/GP).
     surcharge: Option<proava_domain::SurchargeValue>,
     /// Rechengrundlage of Aufteilungszeilen: GP in brackets, counts nothing.
@@ -5626,6 +5686,10 @@ fn lv_row(
             row.ordinal(),
             crate::format::one_line(&row.short_text())
         ),
+    };
+    let name = match &info.share {
+        Some(share) => format!("{name} – Anteil {share}"),
+        None => name,
     };
     let selected = info.selected;
     response
@@ -5870,17 +5934,28 @@ fn lv_row(
                     FontId::monospace(NUMBER_SIZE),
                     palette.text,
                 );
-                // Pauschalsumme of the title (GAEB TotalLSUM): marked in the EP column.
-                if row
+                // Pauschalsumme of the title (GAEB TotalLSUM) and the share
+                // of the LV total (switch in Ansicht): in the EP column.
+                let lump = row
                     .as_group()
-                    .is_some_and(|group| group.lump_sum_total().is_some())
-                {
+                    .is_some_and(|group| group.lump_sum_total().is_some());
+                let ep_text = match (lump, &info.share) {
+                    (true, Some(share)) => Some((format!("pauschal · {share}"), false)),
+                    (true, None) => Some(("pauschal".to_string(), false)),
+                    (false, Some(share)) => Some((share.clone(), true)),
+                    (false, None) => None,
+                };
+                if let Some((text, number)) = ep_text {
                     widgets::cell_text(
                         &painter,
                         egui::pos2(columns.ep_right, middle),
                         Align2::RIGHT_CENTER,
-                        "pauschal",
-                        FontId::proportional(11.5),
+                        &text,
+                        if number {
+                            FontId::monospace(NUMBER_SIZE)
+                        } else {
+                            FontId::proportional(11.5)
+                        },
                         palette.text_dim,
                         columns.ep_right - columns.ep_left - 6.0,
                     );
@@ -6234,6 +6309,17 @@ fn status_text(
 
 /// Cuts `text` with "…" so that it fits `width` in `font` (measured, not estimated).
 /// Line breaks of the text (GAEB-Kurztexte) become spaces: one line per row.
+/// Share of a title sum in the LV net total with one decimal („41,0 %“);
+/// None without a net total.
+fn title_share(total: Money, net: Money) -> Option<String> {
+    if net.cents() == 0 {
+        return None;
+    }
+    let share = proava_domain::Decimal::from(total.cents()) * proava_domain::Decimal::ONE_HUNDRED
+        / proava_domain::Decimal::from(net.cents());
+    Some(format!("{} %", proava_domain::format_decimal_de(share, 1)))
+}
+
 fn fit(painter: &egui::Painter, text: &str, font: &FontId, width: f32) -> (String, bool) {
     widgets::fit_line(painter, text, font, width)
 }
@@ -6625,5 +6711,32 @@ mod drop_tests {
         );
         assert_eq!(drop_row(&[], egui::pos2(50.0, 140.0)), None);
         assert!(catalog_extensions().contains(&"x81".to_string()));
+    }
+}
+
+#[cfg(test)]
+mod title_share_tests {
+    use proava_domain::Money;
+
+    #[test]
+    fn share_of_the_lv_total_with_one_decimal() {
+        let money = |cents: i64| Money::from_cents(cents);
+        assert_eq!(
+            super::title_share(money(10_492_038), money(25_588_528)).as_deref(),
+            Some("41,0 %")
+        );
+        assert_eq!(
+            super::title_share(money(1), money(3)).as_deref(),
+            Some("33,3 %")
+        );
+        assert_eq!(
+            super::title_share(money(0), money(3)).as_deref(),
+            Some("0,0 %")
+        );
+        assert_eq!(
+            super::title_share(money(5), money(0)),
+            None,
+            "ohne LV-Summe kein Anteil"
+        );
     }
 }

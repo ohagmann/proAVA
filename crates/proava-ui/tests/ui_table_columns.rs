@@ -3,13 +3,15 @@
 //! Einstellungen (Vorgabe KG an, LB aus); geerbte Werte grau/kursiv mit
 //! Tooltip „vom Titel …“; Bearbeiten in der Zelle wie Menge/EP (Zeile wählen,
 //! Klick in die Zelle, F2 oder lostippen) mit der Klartext-Liste darunter.
-//! Dazu Strg+E = Eigenschaftenfenster, Strg+Umschalt+F = fertig/offen.
+//! Dazu Strg+E = Eigenschaftenfenster, Strg+Umschalt+F = fertig/offen, und
+//! der Anteil der Titelsummen an der LV-Summe (Ansicht, Spaltenkopf, gemerkt).
 
 mod common;
 
 use common::*;
 use egui::accesskit::Role;
 use egui::Rect;
+use egui_kittest::kittest::NodeT;
 use proava_domain::LvRow;
 use proava_ui::cell_edit::Cell;
 use proava_ui::columns::{Column, ColumnWidths, Columns};
@@ -606,4 +608,69 @@ fn second_clicks_edit_the_text_of_hints_and_performance_descriptions_not_spacers
         );
     }
     assert_eq!(selected(&harness), Some(spacer));
+}
+
+fn share_shown(harness: &UiHarness) -> bool {
+    harness.state().workspace().unwrap().title_share_shown()
+}
+
+/// Names of the table rows that state a share („01 Titel – Anteil 41,0 %“).
+fn rows_with_share(harness: &UiHarness) -> Vec<String> {
+    harness
+        .query_all_by(|node| {
+            node.role() == Role::Row
+                && node
+                    .label()
+                    .is_some_and(|label| label.contains(" – Anteil "))
+        })
+        .filter_map(|node| node.accesskit_node().label())
+        .collect()
+}
+
+#[test]
+fn title_share_is_switched_and_remembered() {
+    let folder = TempDir::new("titelanteil");
+    {
+        let mut harness = open_demo(&folder.0);
+        assert!(!share_shown(&harness), "Vorgabe aus");
+        assert!(rows_with_share(&harness).is_empty(), "ohne Anteil");
+
+        open_menu(&mut harness, "Ansicht");
+        click_check(&mut harness, proava_ui::lv_editor::TITLE_SHARE_LABEL);
+        assert!(share_shown(&harness), "über Ansicht an");
+        // Each title names its share of the LV net total, one decimal.
+        let lv = project(&harness).lv().clone();
+        let net = lv.net_total().cents();
+        assert!(net != 0, "Beispiel-LV hat Preise");
+        let first = &lv.group_totals()[0];
+        let expected = proava_domain::format_decimal_de(
+            proava_domain::Decimal::from(first.total.cents()) * proava_domain::Decimal::ONE_HUNDRED
+                / proava_domain::Decimal::from(net),
+            1,
+        );
+        let ordinal = lv.rows()[first.group_row].ordinal().to_string();
+        let rows = rows_with_share(&harness);
+        assert!(
+            rows.iter()
+                .any(|label| label.starts_with(&format!("{ordinal} "))
+                    && label.ends_with(&format!(" – Anteil {expected} %"))),
+            "{ordinal}: {expected} % in {rows:?}"
+        );
+        let settings = std::fs::read_to_string(folder.0.join("settings.json")).unwrap();
+        assert!(settings.contains("\"anteil\""), "{settings}");
+    }
+    // Next start: still on; the menu of the table head switches it off.
+    let mut harness = open_demo(&folder.0);
+    assert!(share_shown(&harness), "bleibt an");
+    let head = harness
+        .get_by_label(proava_ui::lv_editor::HEADER_NAME)
+        .rect();
+    pointer_click(
+        &mut harness,
+        egui::pos2(head.left() + 300.0, head.center().y),
+        egui::PointerButton::Secondary,
+    );
+    click_check(&mut harness, proava_ui::lv_editor::TITLE_SHARE_LABEL);
+    assert!(!share_shown(&harness), "über den Spaltenkopf aus");
+    assert!(rows_with_share(&harness).is_empty(), "Anteil wieder weg");
 }

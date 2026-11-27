@@ -1017,7 +1017,7 @@ impl SettingsDialog {
         form_kit::section(ui, palette, "Deckblatt");
         ui.label(
             RichText::new(
-                "Form (Standard, Briefkopf oder ohne) wählt man im Druckdialog je Dokumentart.",
+                "Form (Standard, Briefkopf, Tabelle 1, Tabelle 2 oder ohne) wählt man im Druckdialog je Dokumentart.",
             )
             .size(12.0)
             .color(palette.text_dim),

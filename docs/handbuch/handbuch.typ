@@ -428,6 +428,9 @@ und *LB* (Leistungsbereich, Vorgabe aus) schaltest du über #menu[Ansicht] oder 
 Rechtsklick auf den Spaltenkopf ein und aus; proAVA merkt sich die Wahl. Ein Wert, den die
 Zeile von ihrem Titel erbt, steht *grau und kursiv*, der Tooltip nennt den Titel („KG 481
 Automationseinrichtungen – vom Titel 01.481“); eigene Werte stehen schwarz.
+#menu[Ansicht][Anteil der Titelsummen in %] (auch im Rechtsklick-Menü des Spaltenkopfs) zeigt in
+jeder Titelzeile grau in der Spalte EP, wie viel Prozent der LV-Summe netto ihre Titelsumme
+ausmacht (Vorgabe aus, proAVA merkt sich die Wahl).
 Titel und Untertitel sind im hellen Schema gelb hinterlegt – Titel wie „Hellgelb 3“ einer
 Tabellenkalkulation, Untertitel eine Stufe heller. Im dunklen Schema behalten sie den Hintergrund
 der übrigen Zeilen, OZ und Titeltext stehen in hellem Gelb (Untertitel etwas blasser). Das gilt
@@ -1240,7 +1243,8 @@ Die Optionen merkt sich proAVA je Dokumentart.
 Arten, für die noch etwas fehlt (Angebote, Auftrag, Rechnungen), sind ausgegraut. Für die
 LV-Ausdrucke wählst du außerdem den *Inhalt* (Langtexte, Bilder, Hinweise und Vorbemerkungen,
 Ausführungsbeschreibungen, Kostengruppe, Leistungsbereich, Mengenermittlung, Zusammenstellung
-am Ende, neuer Titel auf neuer Seite, Inhaltsverzeichnis, Übertrag, Lesezeichen für Positionen), das *Deckblatt*, den
+am Ende – auf Wunsch mit der Spalte *Anteil*, jede Titelsumme in Prozent der Summe netto, ab Werk
+an –, neuer Titel auf neuer Seite, Inhaltsverzeichnis, Übertrag, Lesezeichen für Positionen), das *Deckblatt*, den
 *Bereich* (ganzes LV oder die markierten Titel) und die *Seite* (A4 hoch oder quer, Schrift 9,
 10 oder 11 pt). Unten: Kopf- und Fußzeile, *Blattrahmen*, *Gitter*, je eine Zusatzzeile für Kopf und Fuß
 (z. B. „Vorabzug – nicht zur Ausführung“), #menu[Seiten zählen] und „nach dem Speichern
@@ -1276,7 +1280,8 @@ wird davon nichts, und beim Kopieren aus dem PDF kommt kein zusätzlicher Text m
   mit OZ und Text (Untertitel darunter eingerückt), darunter jede Position („01.481.0010
   DDC-Station“), Hinweise mit Überschrift und Ausführungsbeschreibungen („A0001 Kabel …“),
   am Ende Zusammenstellung, Schlussbemerkungen und Angaben des Bieters. Ein Titel über mehrere Seiten hat ein
-  Lesezeichen auf seiner ersten Seite.
+  Lesezeichen auf seiner ersten Seite. Im Inhaltsverzeichnis ist jeder Eintrag ein Link zu seinem
+  Titel, ebenso die Seitenzahlen in der Zusammenstellung.
 - *Lesezeichen für Positionen* (Inhalt, Vorgabe an) schaltet nur die Positionen ab – bei sehr
   großen LVs wird die Liste dann kürzer, die Titel bleiben.
 - *Preisspiegel:* Übersicht der Angebote, jeder Titel, Angebotssummen.
@@ -1302,7 +1307,8 @@ du unter #menu[Extras][Einstellungen …] ▸ Drucken ein. Briefe, Niederschrift
 drucken ebenfalls im Stil und in der Akzentfarbe der Einstellungen.
 
 Das Häkchen *Blattrahmen* zieht eine Linie um Kopfzeile, Inhalt und Fußzeile jeder Seite, hoch
-und quer; Kopf und Fuß stehen innen, durch eine Linie vom Inhalt getrennt. Das Deckblatt ist mit
+und quer; Kopf und Fuß stehen innen, senkrecht mittig in ihrem Feld und durch eine Linie vom
+Inhalt getrennt. Das Deckblatt ist mit
 gerahmt (ohne Kopfzeile), Briefe nie. Vorgabe und Strichstärke (dünn oder mittel) stehen ebenfalls
 unter Einstellungen ▸ Drucken.
 
@@ -1315,8 +1321,8 @@ Preisspiegel ist ab Werk umrandet; im Druckdialog merkt sich proAVA die Wahl je 
 
 == Deckblatt
 
-Jede LV-Dokumentart kann ein Deckblatt haben: *Standard*, *Briefkopf* oder *ohne*. Das LV ohne
-Preise hat von Haus aus das Standard-Deckblatt.
+Jede LV-Dokumentart kann ein Deckblatt haben: *Standard*, *Briefkopf*, *Tabelle 1*,
+*Tabelle 2* oder *ohne*. Das LV ohne Preise hat von Haus aus das Standard-Deckblatt.
 
 - *Standard:* Dokumentart groß, LV, Projekt und Baumaßnahme, darunter Bauherr, Auftraggeber/
   Vergabestelle und Planer, die Kenndaten (Vergabeart, -nummer, Abgabetermin und -ort,
@@ -1325,6 +1331,15 @@ Preise hat von Haus aus das Standard-Deckblatt.
   Unterschrift und Stempel).
 - *Briefkopf:* Vergabestelle oben links wie im Brief, die Kenndaten im Kasten rechts, die
   Bieterangaben als Formularzeilen.
+- *Tabelle 1:* Projektbezeichnung fett über der Dokumentart, darunter Adressen, Kenndaten und
+  Bieterfeld in voll umrandeten Tabellen mit hinterlegten Beschriftungen; je Beteiligtem eine
+  Spalte mit dem ganzen Adressblock.
+- *Tabelle 2:* wie Tabelle 1, die Adressen Feld für Feld: je Beteiligtem eine Spalte, je Feld
+  (Name, Zusatz, Straße, PLZ Ort, Telefon, E-Mail) eine Zeile. Felder, die bei allen
+  Beteiligten leer sind, entfallen.
+
+Die Baumaßnahme aus den Projektstammdaten steht in allen Formen als *Baumaßnahme: …* unter
+dem LV.
 
 Leere Angaben lassen ihre Zeile weg. Sicherheiten, Skonto, Abzüge, Zahlungsbedingungen und
 weitere Beteiligte stehen auf der Folgeseite *Vertragsbedingungen*; das LV beginnt danach.

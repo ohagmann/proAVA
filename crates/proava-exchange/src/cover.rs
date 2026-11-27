@@ -41,11 +41,19 @@ pub fn project_cover(project: &Project, style: CoverStyle, blocks: CoverBlocks) 
     .collect();
     // Without an own Auftraggeber (Vergabestelle) the template labels the
     // owner „Bauherr / Auftraggeber“.
-    let mut addresses = vec![("bauherr".to_string(), lines(&info.owner))];
+    let mut parties = vec![("bauherr", &info.owner)];
     if info.client_differs() {
-        addresses.push(("auftraggeber".to_string(), lines(info.client())));
+        parties.push(("auftraggeber", info.client()));
     }
-    addresses.push(("planer".to_string(), lines(&info.planner)));
+    parties.push(("planer", &info.planner));
+    let addresses = parties
+        .iter()
+        .map(|(key, address)| (key.to_string(), lines(address)))
+        .collect();
+    let address_fields = parties
+        .iter()
+        .map(|(key, address)| (key.to_string(), fields(address)))
+        .collect();
 
     let terms = &info.terms;
     let mut security = Section::new("Sicherheiten");
@@ -128,6 +136,7 @@ pub fn project_cover(project: &Project, style: CoverStyle, blocks: CoverBlocks) 
         measure: info.description.trim().to_string(),
         facts,
         addresses,
+        address_fields,
         sections: [security, payment, others]
             .into_iter()
             .map(Section::finish)
@@ -176,6 +185,22 @@ fn lines(address: &Address) -> Vec<String> {
     .into_iter()
     .filter(|line| !line.is_empty())
     .map(str::to_string)
+    .collect()
+}
+
+/// Address field by field for the form „Tabelle 2“ (keys as in `cover.typ`).
+fn fields(address: &Address) -> Vec<(String, String)> {
+    let city = format!("{} {}", address.postal_code.trim(), address.city.trim());
+    [
+        ("name", address.name1.trim()),
+        ("zusatz", address.name2.trim()),
+        ("strasse", address.street.trim()),
+        ("ort", city.trim()),
+        ("telefon", address.phone.trim()),
+        ("email", address.email.trim()),
+    ]
+    .into_iter()
+    .map(|(key, value)| (key.to_string(), value.to_string()))
     .collect()
 }
 
@@ -274,6 +299,21 @@ mod tests {
                 ]
             )
         );
+        // The same address field by field (form „Tabelle 2“).
+        let (key, fields) = &cover.address_fields[0];
+        assert_eq!(key, "bauherr");
+        let field = |name: &str| {
+            fields
+                .iter()
+                .find(|(known, _)| known == name)
+                .map(|(_, value)| value.as_str())
+                .unwrap()
+        };
+        assert_eq!(field("name"), "Stadt Musterstadt");
+        assert_eq!(field("strasse"), "Rathausplatz 1");
+        assert_eq!(field("ort"), "12345 Musterstadt");
+        assert_eq!(field("zusatz"), "");
+        assert_eq!(cover.address_fields.len(), cover.addresses.len());
         assert_eq!(cover.project, "Neubau Schulzentrum");
         let all: Vec<(String, String)> = cover
             .sections
@@ -307,6 +347,14 @@ mod tests {
             (
                 "auftraggeber".to_string(),
                 vec!["Gebäudemanagement Musterstadt".to_string()]
+            )
+        );
+        assert_eq!(cover.address_fields[1].0, "auftraggeber");
+        assert_eq!(
+            cover.address_fields[1].1[0],
+            (
+                "name".to_string(),
+                "Gebäudemanagement Musterstadt".to_string()
             )
         );
     }
