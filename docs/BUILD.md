@@ -201,8 +201,8 @@ das Handbuch veraltet ist.
 |---|---|
 | `linux/` | `proava`, `proava-mcp`, `proava-web` (wenn gebaut), `LICENSE`, `THIRD-PARTY-NOTICES`, `LIESMICH.txt` (`assets/linux/`), `proava-handbuch.pdf`, `icons/`, `proava.desktop`, `proava-mime.xml`, `install_linux.sh` |
 | `windows/` | `proava.exe`, `proava-mcp.exe`, `proava-web.exe`, `LICENSE.txt`, `THIRD-PARTY-NOTICES.txt`, `LIESMICH.txt` (`assets/windows/`, alle drei CRLF), `proava-handbuch.pdf`, `dictionaries/LIESMICH.txt` |
-| `proava-<v>-linux-x86_64.tar.gz`, `proava-<v>-windows-x86_64.zip` | die Ordner als `proava-<v>/` |
-| `proava-<v>-x86_64.AppImage` | Linux in einer Datei (`scripts/appimage.sh`), nur wenn die AppImage-Werkzeuge da sind |
+| `proava-<v>-x86_64.AppImage` | Linux zum Ausliefern: eine Datei (`scripts/appimage.sh` aus `linux/`) |
+| `proava-<v>-windows-x86_64.zip` | Windows zum Ausliefern: der Ordner `windows/` als `proava-<v>/` |
 | `SHA256SUMS` | Prüfsummen aller Dateien |
 
 **Handbuch:** `docs/handbuch/handbuch.typ` → `proava-handbuch.pdf` mit `scripts/handbuch.sh` (erzeugt zuerst
@@ -225,8 +225,9 @@ aus `cargo metadata` beider Workspaces; nach jeder Änderung an `Cargo.lock` neu
 Programm selbst zeigt „proAVA wurde aktualisiert – bitte neu starten“ mit Knopf (`proava_application::program_update`),
 der MCP-Server hängt einen Hinweis an seine nächste Antwort.
 
-**AppImage:** `scripts/appimage.sh [LINUX-ORDNER [ZIEL]]` packt den fertigen `linux/`-Ordner mit
-`assets/linux/AppRun` in ein AppImage (`release.sh` ruft es auf). Werkzeuge einmal herunterladen, nicht im Repo:
+**AppImage:** Linux wird nur als AppImage ausgeliefert; `linux/` ist seine Zwischenstufe (dort richtet
+`./install_linux.sh` auch ohne AppImage ein). `scripts/appimage.sh [LINUX-ORDNER [ZIEL]]` packt den fertigen
+`linux/`-Ordner mit `assets/linux/AppRun` in ein AppImage (`release.sh` ruft es auf). Werkzeuge einmal herunterladen, nicht im Repo:
 `appimagetool-x86_64.AppImage` (github.com/AppImage/appimagetool) und `runtime-x86_64`
 (github.com/AppImage/type2-runtime) nach `~/.local/opt/appimage` (oder `APPIMAGE_TOOLS`). Läuft auf Systemen mit
 derselben oder neuerer glibc als das Build-System; das Browserfenster nutzt WebKitGTK 4.1 vom System. `AppRun`:

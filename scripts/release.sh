@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# Auslieferung bauen: Linux und Windows (Release) plus LICENSE und THIRD-PARTY-NOTICES nach
-#   dist/<version>/linux/    proava, proava-mcp, proava-web (Browserfenster, wenn WebKitGTK 4.1
-#                            zum Bauen da ist; gestrippt), LICENSE, THIRD-PARTY-NOTICES, Symbole,
-#                            LIESMICH.txt, .desktop, MIME-Typen, install_linux.sh (im entpackten
-#                            Archiv ausführbar)
+# Auslieferung bauen: Linux als AppImage, Windows als Zip (Release), plus LICENSE und THIRD-PARTY-NOTICES:
+#   dist/<version>/proava-<version>-x86_64.AppImage   Linux in einer Datei (scripts/appimage.sh)
+#   dist/<version>/proava-<version>-windows-x86_64.zip
+#   dist/<version>/linux/    Zwischenstufe des AppImage: proava, proava-mcp, proava-web (Browserfenster,
+#                            wenn WebKitGTK 4.1 zum Bauen da ist; gestrippt), LICENSE, THIRD-PARTY-NOTICES,
+#                            Symbole, LIESMICH.txt, .desktop, MIME-Typen, install_linux.sh (startet auch
+#                            von hier: ./install_linux.sh richtet ohne AppImage ein)
 #   dist/<version>/windows/  proava.exe, proava-mcp.exe, proava-web.exe, LICENSE.txt, THIRD-PARTY-NOTICES.txt,
 #                            LIESMICH.txt,
 #                            proava-handbuch.pdf (auch unter linux/; zusätzlich im Programm eingebettet),
 #                            dictionaries\LIESMICH.txt (Platz für ein Hunspell-Wörterbuch)
-#   dist/<version>/proava-<version>-linux-x86_64.tar.gz, proava-<version>-windows-x86_64.zip
-#   dist/<version>/proava-<version>-x86_64.AppImage (Linux in einer Datei, scripts/appimage.sh;
-#                            nur wenn appimagetool und die Laufzeit da sind)
 #   dist/<version>/SHA256SUMS
 #
 #   scripts/release.sh                beides
@@ -52,7 +51,7 @@ fi
 if [ "$NUR_WINDOWS" = 1 ]; then
     rm -rf "$DIST/windows" "$DIST/proava-$VERSION-windows-x86_64.zip"
 elif [ "$NUR_LINUX" = 1 ]; then
-    rm -rf "$DIST/linux" "$DIST/proava-$VERSION-linux-x86_64.tar.gz" "$DIST/proava-$VERSION-x86_64.AppImage"
+    rm -rf "$DIST/linux" "$DIST/proava-$VERSION-x86_64.AppImage"
 else
     rm -rf "$DIST"
 fi
@@ -80,13 +79,8 @@ if [ "$NUR_WINDOWS" = 0 ]; then
     mkdir -p "$DIST/linux/icons"
     cp assets/icons/proava-*.png "$DIST/linux/icons/"
     cp assets/linux/proava.desktop assets/linux/proava-mime.xml scripts/install_linux.sh "$DIST/linux/"
-    tar -C "$DIST" -czf "$DIST/proava-$VERSION-linux-x86_64.tar.gz" --transform "s|^linux|proava-$VERSION|" linux
-    if [ -x "${APPIMAGE_TOOLS:-$HOME/.local/opt/appimage}/appimagetool-x86_64.AppImage" ]; then
-        echo "== Linux (AppImage)"
-        scripts/appimage.sh "$DIST/linux" "$DIST/proava-$VERSION-x86_64.AppImage"
-    else
-        echo "Hinweis: appimagetool fehlt – ohne AppImage (siehe scripts/appimage.sh)."
-    fi
+    echo "== Linux (AppImage)"
+    scripts/appimage.sh "$DIST/linux" "$DIST/proava-$VERSION-x86_64.AppImage"
 fi
 
 if [ "$NUR_LINUX" = 0 ]; then

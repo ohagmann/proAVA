@@ -56,6 +56,13 @@ Namen und bleiben neben dem Projekt.
 Regel: Abhängigkeiten zeigen nach innen. Die Domäne kennt niemanden, die UI kennt keinen
 Speicher, die Infrastruktur ersetzt nur Ports.
 
+## Herunterladen
+
+Fertige Programme liegen unter [Releases](https://github.com/ohagmann/proAVA/releases/latest):
+Linux als AppImage (`proava-…-x86_64.AppImage`, ab Ubuntu 24.04 / Linux Mint 22: ausführbar machen,
+starten, unten im Startfenster „Ins Startmenü eintragen“), Windows als Zip (`proava-…-windows-x86_64.zip`:
+entpacken, `proava.exe` starten).
+
 ## Bauen und starten
 
 ```bash

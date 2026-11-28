@@ -279,8 +279,8 @@ mit, Positionen beginnen wieder „offen“.
 == Öffnen, Doppelklick, Kommandozeile
 
 #menu[Projekt öffnen …] wählt eine `.proava`. #menu[Neues Projekt aus GAEB …] legt aus einer
-GAEB-Datei (@gaeb-import) oder CSV-Tabelle (@csv) ein neues Projekt an. Nach der Einrichtung mit
-`install_linux.sh` öffnet auch ein *Doppelklick* im Dateimanager das Projekt; für GAEB-Dateien
+GAEB-Datei (@gaeb-import) oder CSV-Tabelle (@csv) ein neues Projekt an. Ist proAVA im Startmenü
+eingetragen (AppImage, siehe unten), öffnet auch ein *Doppelklick* im Dateimanager das Projekt; für GAEB-Dateien
 und CSV-Tabellen gibt es „Öffnen mit proAVA“. Dasselbe geht auf der Kommandozeile:
 `proava Projekt.proava`, `proava LV.X83` bzw. `proava Zulieferung.csv`;
 `proava --schreibgeschuetzt Projekt.proava` öffnet nur zum Lesen und Kopieren.

@@ -135,7 +135,8 @@ if [ -n "$APPIMAGE_DATEI" ]; then
     echo "  Programm   $APPIMAGE_DATEI"
     echo "  Startmenü  $APPS/proava.desktop"
     echo "  Dateitypen ${MIME_TYPES[*]}"
-    if [ -x "$BIN/proava" ]; then
+    # Eine Verknüpfung auf das AppImage (proava/proava-mcp → AppImage) ist kein zweites proAVA.
+    if [ -x "$BIN/proava" ] && [ ! -L "$BIN/proava" ]; then
         echo "Hinweis: In $BIN liegt außerdem ein installiertes proAVA – das Startmenü startet jetzt das AppImage."
     fi
     exit 0
