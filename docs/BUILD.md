@@ -202,6 +202,7 @@ das Handbuch veraltet ist.
 | `linux/` | `proava`, `proava-mcp`, `proava-web` (wenn gebaut), `LICENSE`, `THIRD-PARTY-NOTICES`, `LIESMICH.txt` (`assets/linux/`), `proava-handbuch.pdf`, `icons/`, `proava.desktop`, `proava-mime.xml`, `install_linux.sh` |
 | `windows/` | `proava.exe`, `proava-mcp.exe`, `proava-web.exe`, `LICENSE.txt`, `THIRD-PARTY-NOTICES.txt`, `LIESMICH.txt` (`assets/windows/`, alle drei CRLF), `proava-handbuch.pdf`, `dictionaries/LIESMICH.txt` |
 | `proava-<v>-linux-x86_64.tar.gz`, `proava-<v>-windows-x86_64.zip` | die Ordner als `proava-<v>/` |
+| `proava-<v>-x86_64.AppImage` | Linux in einer Datei (`scripts/appimage.sh`), nur wenn die AppImage-Werkzeuge da sind |
 | `SHA256SUMS` | Prüfsummen aller Dateien |
 
 **Handbuch:** `docs/handbuch/handbuch.typ` → `proava-handbuch.pdf` mit `scripts/handbuch.sh` (erzeugt zuerst
@@ -223,6 +224,17 @@ aus `cargo metadata` beider Workspaces; nach jeder Änderung an `Cargo.lock` neu
 `--entfernen` nimmt alles wieder heraus. Ersetzt es ein laufendes proAVA, meldet das Skript die alten Prozesse; das
 Programm selbst zeigt „proAVA wurde aktualisiert – bitte neu starten“ mit Knopf (`proava_application::program_update`),
 der MCP-Server hängt einen Hinweis an seine nächste Antwort.
+
+**AppImage:** `scripts/appimage.sh [LINUX-ORDNER [ZIEL]]` packt den fertigen `linux/`-Ordner mit
+`assets/linux/AppRun` in ein AppImage (`release.sh` ruft es auf). Werkzeuge einmal herunterladen, nicht im Repo:
+`appimagetool-x86_64.AppImage` (github.com/AppImage/appimagetool) und `runtime-x86_64`
+(github.com/AppImage/type2-runtime) nach `~/.local/opt/appimage` (oder `APPIMAGE_TOOLS`). Läuft auf Systemen mit
+derselben oder neuerer glibc als das Build-System; das Browserfenster nutzt WebKitGTK 4.1 vom System. `AppRun`:
+ohne Argument proAVA, `mcp` der MCP-Server (auch über eine Verknüpfung namens `proava-mcp`), `--integrieren`
+Startmenü und Dateitypen (`install_linux.sh --appimage DATEI` aus dem Abbild), `--entfernen`. proAVA erkennt das
+AppImage an `APPIMAGE`/`APPDIR` (`program_update::running_appimage`): „Neues Fenster“ und „Neu starten“ starten die
+AppImage-Datei, der Update-Hinweis beobachtet sie, und das Startfenster bietet „Ins Startmenü eintragen“, solange
+`proava.desktop` nicht auf dieses AppImage zeigt. Lizenz der Laufzeit: `assets/linux/APPIMAGE-LAUFZEIT.txt`.
 
 **Kommandozeile:** `proava [DATEI]` öffnet ein Projekt bzw. startet „Neues Projekt aus …“ mit einer GAEB- oder
 CSV-Datei; `--schreibgeschuetzt` öffnet nur zum Lesen; `--version` zeigt Version, Build-Datum und Commit

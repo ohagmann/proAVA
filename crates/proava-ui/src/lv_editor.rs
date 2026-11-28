@@ -26,6 +26,7 @@ mod convert;
 mod cost_group;
 mod details;
 mod fields;
+mod insert_renumbering;
 mod library_fields;
 mod multi_lv;
 mod pdf_clip;
@@ -240,6 +241,8 @@ enum Dialog {
     ConvertRow(Box<convert::PendingConversion>),
     /// „In freie Position umwandeln“ for these STLB-Bau positions (see `stlb_lock`).
     ConvertFree(Vec<RowId>),
+    /// No free order number where rows go in: insert and renumber the title?
+    InsertRenumbering(Box<insert_renumbering::PendingRenumber>),
 }
 
 pub struct LvEditor {
@@ -865,7 +868,11 @@ impl LvEditor {
                 let ids: HashSet<RowId> = lv.rows().iter().map(LvRow::id).collect();
                 let output = self.paste_transfer(project, transfer);
                 if !output.dirty {
-                    return output;
+                    // The question could only insert behind the first row.
+                    return match self.withdraw_renumbering() {
+                        Some(error) => EditorOutput::toast(error),
+                        None => output,
+                    };
                 }
                 let new: Vec<usize> = project
                     .lv()
@@ -1568,16 +1575,15 @@ impl LvEditor {
             Command::NewPosition | Command::NewPositionBefore => {
                 let ahead = command == Command::NewPositionBefore;
                 let before = project.lv().clone();
-                // In a library the position goes into the title of the
-                // Schreibmarke, without new titles below it.
-                let titles = if self.library_mode {
-                    lv_ops::NewTitles::Never
-                } else {
-                    lv_ops::NewTitles::Fill
-                };
-                let result =
-                    lv_ops::insert_position_with(project.lv_mut(), selected, ahead, titles);
-                output.merge(self.inserted(project, before, result, Focus::Short));
+                let titles = self.new_position_titles();
+                match lv_ops::insert_position_with(project.lv_mut(), selected, ahead, titles) {
+                    Err(error) => output.merge(self.insert_failed(
+                        project,
+                        insert_renumbering::Retry::Command(command),
+                        error,
+                    )),
+                    result => output.merge(self.inserted(project, before, result, Focus::Short)),
+                }
             }
             Command::NewTitle => {
                 let before = project.lv().clone();
@@ -1681,7 +1687,11 @@ impl LvEditor {
                             output.dirty = true;
                             output.toast = Some("Dupliziert.".into());
                         }
-                        Err(error) => output.toast = Some(error),
+                        Err(error) => output.merge(self.insert_failed(
+                            project,
+                            insert_renumbering::Retry::Command(command),
+                            error,
+                        )),
                     }
                 }
             }
@@ -2410,9 +2420,22 @@ impl LvEditor {
                     crate::format::count(rows.len(), "Zeile", "Zeilen")
                 ));
             }
-            Err(error) => output.toast = Some(error),
+            Err(error) => {
+                return self.insert_failed(project, insert_renumbering::Retry::PasteInternal, error)
+            }
         }
         output
+    }
+
+    /// Which titles come along with a new position: in a library the
+    /// position goes into the title of the Schreibmarke, without new titles
+    /// below it.
+    fn new_position_titles(&self) -> lv_ops::NewTitles {
+        if self.library_mode {
+            lv_ops::NewTitles::Never
+        } else {
+            lv_ops::NewTitles::Fill
+        }
     }
 
     /// Pastes rows from another proAVA window or project: new ids and
@@ -2422,11 +2445,9 @@ impl LvEditor {
         project: &mut Project,
         transfer: &proava_domain::transfer::Transfer,
     ) -> EditorOutput {
-        let mut transfer = transfer.clone();
-        if project.lv().level_count() == 0 {
-            // No title level: only the content of the titles.
-            transfer.rows.retain(|row| !row.is_group());
-        }
+        let taken = transfer;
+        // No title level: only the content of the titles.
+        let transfer = insert_renumbering::fitting(project, taken);
         let selected = self.selected_index(project.lv());
         let before = project.lv().clone();
         match proava_domain::transfer::insert(project, selected, &transfer) {
@@ -2443,7 +2464,11 @@ impl LvEditor {
                     ..EditorOutput::default()
                 }
             }
-            Err(error) => EditorOutput::toast(error),
+            Err(error) => self.insert_failed(
+                project,
+                insert_renumbering::Retry::PasteTransfer(Box::new(taken.clone())),
+                error,
+            ),
         }
     }
 
@@ -4936,6 +4961,9 @@ impl LvEditor {
         project: &mut Project,
         output: &mut EditorOutput,
     ) {
+        if self.insert_renumbering_dialog(ui, palette, project, output) {
+            return;
+        }
         if self.structure_dialogs(ui, palette, project, output) {
             return;
         }

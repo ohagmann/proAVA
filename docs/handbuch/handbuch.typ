@@ -285,6 +285,14 @@ und CSV-Tabellen gibt es „Öffnen mit proAVA“. Dasselbe geht auf der Kommand
 `proava Projekt.proava`, `proava LV.X83` bzw. `proava Zulieferung.csv`;
 `proava --schreibgeschuetzt Projekt.proava` öffnet nur zum Lesen und Kopieren.
 
+*Als AppImage* (eine Datei, etwa für einen Laptop): `proava-<Version>-x86_64.AppImage`
+ausführbar machen (Dateimanager: Eigenschaften ▸ Rechte ▸ „Als Programm ausführen“) und
+starten. Unten im Startfenster trägt #menu[Ins Startmenü eintragen] proAVA ins Startmenü ein;
+Doppelklick auf `.proava`-Dateien öffnet dann dieses AppImage. Liegt die Datei später woanders
+oder kommt eine neue Version mit anderem Namen, bietet das Startfenster den Knopf wieder an. Wird
+die Datei durch eine neue ersetzt, sagt proAVA „bitte neu starten“. Der MCP-Server läuft mit
+`… .AppImage mcp`.
+
 == Zwei Fenster und schreibgeschützt öffnen
 
 #menu[Projekt][Neues Fenster] startet ein zweites proAVA, #menu[Projekt][Projekt
@@ -410,10 +418,19 @@ Nummern passiert, und lässt dich wählen (neu nummerieren oder die OZ lassen, w
 Solange ein LV fortlaufend nummeriert ist, nummeriert proAVA nach jedem Einfügen,
 Verschieben oder Löschen neu – je Titel, mit der Schrittweite (0010, 0020 …). Hat das LV
 *eigene* OZ (aus GAEB übernommen oder von Hand geändert), bleiben sie stehen; eine neue Zeile
-bekommt dann eine freie OZ zwischen den Nachbarn (0015 zwischen 0010 und 0020). Ist dort
-nichts frei, hilft #menu[LV][Neu nummerieren …]: ganzes LV oder nur der gewählte Titel, nur
-Positionen oder auch Titel, fertige Positionen behalten auf Wunsch ihre OZ; die Vorschau zeigt
-alt → neu.
+bekommt dann eine freie OZ zwischen den Nachbarn (0015 zwischen 0010 und 0020).
+
+Ist dort nichts frei (0078 und 0079 stehen direkt hintereinander), fragt proAVA beim Einfügen
+– neue Position, #taste[Strg+V], Duplizieren, Übernahme aus Bibliothek oder anderem Fenster:
+„Einfügen und neu nummerieren?“. Die Liste zeigt alt → neu und die neue Zeile. Mit
+#menu[Einfügen] (oder #taste[Enter]) kommt die Zeile an ihre Stelle, und die Positionen dieses
+Titels zählen wieder in Schritten (0070, 0080, 0090 …); die Titelnummern, die übrigen Titel und
+fertige Positionen bleiben. #taste[Strg+Z] nimmt beides in einem Schritt zurück. Bekäme dabei eine
+fertige Position eine neue OZ, fügt proAVA nicht ein und nennt sie.
+
+Das ganze LV oder einen Titel nummerierst du jederzeit mit #menu[LV][Neu nummerieren …]: ganzes
+LV oder nur der gewählte Titel, nur Positionen oder auch Titel, fertige Positionen behalten auf
+Wunsch ihre OZ; die Vorschau zeigt alt → neu.
 
 Die OZ einer Zeile änderst du im Eigenschaftenfenster (Feld *Ordnungszahl*), direkt in der
 Tabelle (Spalte OZ, #taste[F2]) oder mit #menu[Ordnungszahl ändern …] (#taste[Strg+Umschalt+O]).

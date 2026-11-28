@@ -101,6 +101,71 @@ fn program_file() -> Result<PathBuf, String> {
         .map_err(|error| format!("Programmdatei nicht gefunden: {error}"))
 }
 
+/// The AppImage this proAVA runs from (see
+/// [`proava_application::program_update::running_appimage`]).
+pub(crate) fn appimage() -> Option<PathBuf> {
+    let exe = program_file().ok()?;
+    proava_application::program_update::running_appimage(
+        &exe,
+        std::env::var_os("APPIMAGE").as_deref(),
+        std::env::var_os("APPDIR").as_deref(),
+    )
+}
+
+/// Desktop entry of proAVA in the start menu (`install_linux.sh`).
+fn desktop_entry() -> Option<PathBuf> {
+    let share = std::env::var_os("XDG_DATA_HOME")
+        .filter(|folder| !folder.is_empty())
+        .map(PathBuf::from)
+        .or_else(|| {
+            std::env::var_os("HOME").map(|home| PathBuf::from(home).join(".local/share"))
+        })?;
+    Some(share.join("applications/proava.desktop"))
+}
+
+/// The AppImage this proAVA runs from when the start menu does not start it
+/// yet (no entry, or one for another file or the installed program) – then
+/// the start screen offers „Ins Startmenü eintragen“. Never in tests.
+pub fn appimage_not_in_menu() -> Option<PathBuf> {
+    if !external_programs_allowed() {
+        return None;
+    }
+    let image = appimage()?;
+    let text = desktop_entry()
+        .and_then(|entry| std::fs::read_to_string(entry).ok())
+        .unwrap_or_default();
+    (!proava_application::program_update::desktop_entry_starts(&text, &image)).then_some(image)
+}
+
+/// Puts the running AppImage into the start menu with the file types
+/// .proava and GAEB (`install_linux.sh --appimage` from inside the image);
+/// returns what it says. Same brakes as [`new_window`].
+pub fn put_appimage_in_menu() -> Result<String, String> {
+    if !external_programs_allowed() {
+        refuse()?;
+        return Ok(String::new());
+    }
+    let image = appimage().ok_or("proAVA läuft nicht als AppImage.")?;
+    let script = std::env::var_os("APPDIR")
+        .map(|folder| PathBuf::from(folder).join("usr/share/proava/install_linux.sh"))
+        .filter(|script| script.is_file())
+        .ok_or("Im AppImage fehlt install_linux.sh.")?;
+    let output = std::process::Command::new(&script)
+        .arg("--appimage")
+        .arg(&image)
+        .stdin(std::process::Stdio::null())
+        .output()
+        .map_err(|error| format!("Eintragen ging nicht: {error}"))?;
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+    } else {
+        Err(format!(
+            "Eintragen ging nicht: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ))
+    }
+}
+
 /// Depth of this window in a chain of „Neues Fenster“ (0 = started by the user).
 fn window_depth() -> u32 {
     std::env::var(WINDOW_DEPTH)
@@ -151,6 +216,9 @@ fn start_proava(arguments: &[std::ffi::OsString], deeper: u32) -> Result<(), Str
             "Neues Fenster abgelehnt: schon {depth} Fenster nacheinander geöffnet."
         ));
     }
+    // From an AppImage the image itself: the program inside lives only as
+    // long as the window that mounted it.
+    let program = appimage().unwrap_or(program);
     std::process::Command::new(&program)
         .args(arguments)
         .env(WINDOW_DEPTH, (depth + deeper).to_string())

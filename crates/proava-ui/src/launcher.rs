@@ -76,6 +76,18 @@ enum Action {
     ConfirmCopy,
 }
 
+/// A button of the status bar.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum StatusClick {
+    /// „Neu starten“ after an update.
+    Restart,
+    /// „Ins Startmenü eintragen“ (AppImage).
+    PutInMenu,
+}
+
+/// Button of the status bar while an AppImage is not in the start menu.
+pub const APPIMAGE_MENU: &str = "Ins Startmenü eintragen";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Dialog {
     NewProject,
@@ -131,6 +143,9 @@ pub struct LauncherScreen {
     program_updated: bool,
     /// „Neu starten“ was clicked (the host restarts).
     restart_requested: bool,
+    /// proAVA runs from this AppImage and the start menu does not start it:
+    /// the status bar offers „Ins Startmenü eintragen“.
+    appimage_not_in_menu: Option<PathBuf>,
     form_name: String,
     form_folder: String,
     form_file: String,
@@ -178,6 +193,7 @@ impl LauncherScreen {
             missing_checked_for: usize::MAX,
             program_updated: false,
             restart_requested: false,
+            appimage_not_in_menu: crate::jobs::appimage_not_in_menu(),
             import_job: None,
             focus_first: false,
             form_name: String::new(),
@@ -232,8 +248,10 @@ impl LauncherScreen {
         }
 
         self.header(ui, &mut actions);
-        if self.status_bar(ui) {
-            self.restart_requested = true;
+        match self.status_bar(ui) {
+            Some(StatusClick::Restart) => self.restart_requested = true,
+            Some(StatusClick::PutInMenu) => self.put_appimage_in_menu(&ctx),
+            None => {}
         }
         self.action_panel(ui, &mut actions);
         self.preview_panel(ui, &mut actions);
@@ -590,10 +608,10 @@ impl LauncherScreen {
         }
     }
 
-    /// The status bar; true when „Neu starten“ was clicked.
-    fn status_bar(&self, ui: &mut egui::Ui) -> bool {
+    /// The status bar and which of its buttons was clicked.
+    fn status_bar(&self, ui: &mut egui::Ui) -> Option<StatusClick> {
         let palette = self.palette;
-        let mut restart = false;
+        let mut clicked = None;
         let notice = self.notice.as_ref().map(|(text, _)| text.clone());
         let running = self.import_job.as_ref().map(|job| job.label().to_string());
 
@@ -655,7 +673,7 @@ impl LauncherScreen {
                                 .strong()
                                 .color(palette.warn),
                         );
-                        restart = ui
+                        if ui
                             .add(
                                 egui::Button::new(
                                     RichText::new(crate::update_notice::RESTART).size(12.5),
@@ -663,7 +681,25 @@ impl LauncherScreen {
                                 .small(),
                             )
                             .on_hover_text(crate::update_notice::RESTART_HOVER)
-                            .clicked();
+                            .clicked()
+                        {
+                            clicked = Some(StatusClick::Restart);
+                        }
+                    }
+                    if let Some(image) = &self.appimage_not_in_menu {
+                        ui.add_space(14.0);
+                        if ui
+                            .add(egui::Button::new(RichText::new(APPIMAGE_MENU).size(12.5)).small())
+                            .on_hover_text(format!(
+                                "proAVA läuft als AppImage ({}) und steht noch nicht im Startmenü. \
+                                 Eintragen legt den Eintrag im Startmenü an und öffnet .proava- und \
+                                 GAEB-Dateien mit diesem AppImage.",
+                                image.display()
+                            ))
+                            .clicked()
+                        {
+                            clicked = Some(StatusClick::PutInMenu);
+                        }
                     }
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.label(
@@ -674,7 +710,21 @@ impl LauncherScreen {
                     });
                 });
             });
-        restart
+        clicked
+    }
+
+    /// „Ins Startmenü eintragen“: `install_linux.sh --appimage` from the image.
+    fn put_appimage_in_menu(&mut self, ctx: &egui::Context) {
+        match crate::jobs::put_appimage_in_menu() {
+            Ok(_) => {
+                self.appimage_not_in_menu = crate::jobs::appimage_not_in_menu();
+                self.toast(
+                    ctx,
+                    "proAVA steht im Startmenü; .proava-Dateien öffnen dieses AppImage.",
+                );
+            }
+            Err(error) => self.toast(ctx, error),
+        }
     }
 
     fn apply(&mut self, ctx: &egui::Context, action: Action) {

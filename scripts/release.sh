@@ -9,6 +9,8 @@
 #                            proava-handbuch.pdf (auch unter linux/; zusätzlich im Programm eingebettet),
 #                            dictionaries\LIESMICH.txt (Platz für ein Hunspell-Wörterbuch)
 #   dist/<version>/proava-<version>-linux-x86_64.tar.gz, proava-<version>-windows-x86_64.zip
+#   dist/<version>/proava-<version>-x86_64.AppImage (Linux in einer Datei, scripts/appimage.sh;
+#                            nur wenn appimagetool und die Laufzeit da sind)
 #   dist/<version>/SHA256SUMS
 #
 #   scripts/release.sh                beides
@@ -50,7 +52,7 @@ fi
 if [ "$NUR_WINDOWS" = 1 ]; then
     rm -rf "$DIST/windows" "$DIST/proava-$VERSION-windows-x86_64.zip"
 elif [ "$NUR_LINUX" = 1 ]; then
-    rm -rf "$DIST/linux" "$DIST/proava-$VERSION-linux-x86_64.tar.gz"
+    rm -rf "$DIST/linux" "$DIST/proava-$VERSION-linux-x86_64.tar.gz" "$DIST/proava-$VERSION-x86_64.AppImage"
 else
     rm -rf "$DIST"
 fi
@@ -79,6 +81,12 @@ if [ "$NUR_WINDOWS" = 0 ]; then
     cp assets/icons/proava-*.png "$DIST/linux/icons/"
     cp assets/linux/proava.desktop assets/linux/proava-mime.xml scripts/install_linux.sh "$DIST/linux/"
     tar -C "$DIST" -czf "$DIST/proava-$VERSION-linux-x86_64.tar.gz" --transform "s|^linux|proava-$VERSION|" linux
+    if [ -x "${APPIMAGE_TOOLS:-$HOME/.local/opt/appimage}/appimagetool-x86_64.AppImage" ]; then
+        echo "== Linux (AppImage)"
+        scripts/appimage.sh "$DIST/linux" "$DIST/proava-$VERSION-x86_64.AppImage"
+    else
+        echo "Hinweis: appimagetool fehlt – ohne AppImage (siehe scripts/appimage.sh)."
+    fi
 fi
 
 if [ "$NUR_LINUX" = 0 ]; then

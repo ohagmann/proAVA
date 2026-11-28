@@ -32,7 +32,11 @@ impl LvEditor {
                     ..EditorOutput::default()
                 }
             }
-            Err(error) => EditorOutput::toast(error),
+            Err(error) => self.insert_failed(
+                project,
+                super::insert_renumbering::Retry::InsertTransfer(Box::new(taken.clone())),
+                error,
+            ),
         }
     }
 
@@ -79,6 +83,12 @@ impl LvEditor {
                 // before the first row: insert after it, then move the rows up
                 let before = project.lv().clone();
                 let mut output = self.insert_transfer(project, taken);
+                if !output.dirty {
+                    // The question could only insert behind the first row.
+                    if let Some(error) = self.withdraw_renumbering() {
+                        return EditorOutput::toast(error);
+                    }
+                }
                 if output.dirty {
                     let count = taken.rows.len().min(project.lv().rows().len());
                     let start = project.lv().rows().len().min(1);

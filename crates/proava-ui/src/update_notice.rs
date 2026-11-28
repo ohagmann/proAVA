@@ -91,7 +91,8 @@ impl UpdateWatch {
 /// Reads the program file (path of the running program and its time) and
 /// applies the rules of `proava_application::program_update`.
 fn program_file_replaced(started: SystemTime) -> bool {
-    let Ok(exe) = std::env::current_exe() else {
+    // From an AppImage: the image file (the program inside never changes).
+    let Some(exe) = crate::jobs::appimage().or_else(|| std::env::current_exe().ok()) else {
         return false;
     };
     let modified = std::fs::metadata(without_deleted_mark(exe.clone()))

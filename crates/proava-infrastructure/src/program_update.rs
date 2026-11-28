@@ -5,7 +5,7 @@
 use std::path::Path;
 use std::time::SystemTime;
 
-use proava_application::program_update::{replaced, without_deleted_mark};
+use proava_application::program_update::{replaced, running_appimage, without_deleted_mark};
 
 /// The program file of this process and when the process started.
 #[derive(Debug, Clone, Copy)]
@@ -27,6 +27,13 @@ impl ProgramFile {
         let Ok(exe) = std::env::current_exe() else {
             return false;
         };
+        // From an AppImage („proAVA.AppImage mcp“): the image file.
+        let exe = running_appimage(
+            &without_deleted_mark(exe.clone()),
+            std::env::var_os("APPIMAGE").as_deref(),
+            std::env::var_os("APPDIR").as_deref(),
+        )
+        .unwrap_or(exe);
         let plain = without_deleted_mark(exe.clone());
         let modified = std::fs::metadata(&plain)
             .and_then(|metadata| metadata.modified())

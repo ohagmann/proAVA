@@ -12,6 +12,10 @@
 #                                              sonst target/release)
 #   scripts/install_linux.sh --gaeb-standard   zusätzlich proAVA als Standard für GAEB-Dateien
 #   scripts/install_linux.sh --entfernen       alles wieder entfernen (Projekte bleiben)
+#   install_linux.sh --appimage DATEI          nur Startmenü, Dateitypen, Symbole und Doku für
+#                                              das AppImage DATEI (Exec = DATEI), keine Programme
+#                                              nach ~/.local/bin; ruft das AppImage selbst auf
+#                                              („Ins Startmenü eintragen“, „DATEI --integrieren“)
 #
 # Doppelklick auf eine .proava öffnet das Projekt; GAEB-Dateien bekommen
 # „Öffnen mit proAVA“ (→ Neues Projekt aus GAEB). Standard für GAEB wird proAVA
@@ -73,13 +77,69 @@ fi
 
 GAEB_STANDARD=0
 QUELLE=""
-for arg in "$@"; do
-    case "$arg" in
+APPIMAGE_DATEI=""
+while [ $# -gt 0 ]; do
+    case "$1" in
         --gaeb-standard) GAEB_STANDARD=1 ;;
-        -*) fehlt "Unbekannte Option: $arg" ;;
-        *) QUELLE="$arg" ;;
+        --appimage)
+            [ $# -ge 2 ] || fehlt "--appimage braucht den Pfad des AppImage."
+            APPIMAGE_DATEI="$2"
+            shift
+            ;;
+        -*) fehlt "Unbekannte Option: $1" ;;
+        *) QUELLE="$1" ;;
     esac
+    shift
 done
+
+# Symbole, Startmenü-Eintrag (Exec = Programm), Dateitypen, Doku.
+einrichten_ohne_programm() {
+    local exec_programm=$1 zeile
+    mkdir -p "$APPS" "$MIME/packages" "$DOC"
+    for n in "${SIZES[@]}"; do
+        mkdir -p "$ICONS/${n}x${n}/apps"
+        install -m 644 "$ASSETS_ICONS/proava-$n.png" "$ICONS/${n}x${n}/apps/proava.png"
+    done
+    # Exec mit vollem Pfad: ~/.local/bin steht nicht immer im PATH des Desktops.
+    while IFS= read -r zeile || [ -n "$zeile" ]; do
+        case "$zeile" in
+            "Exec=proava "*) printf 'Exec=%s %s\n' "$exec_programm" "${zeile#Exec=proava }" ;;
+            *) printf '%s\n' "$zeile" ;;
+        esac
+    done <"$ASSETS_DESKTOP" >"$APPS/proava.desktop"
+    chmod 644 "$APPS/proava.desktop"
+    install -m 644 "$ASSETS_MIME" "$MIME/packages/proava.xml"
+    install -m 644 "$LIZENZ" "$DOC/LICENSE"
+    install -m 644 "$NOTICES" "$DOC/THIRD-PARTY-NOTICES"
+    install -m 644 "$HANDBUCH" "$DOC/proava-handbuch.pdf"
+    aktualisieren
+    if command -v xdg-mime >/dev/null 2>&1; then
+        xdg-mime default proava.desktop application/x-proava
+        if [ "$GAEB_STANDARD" = 1 ]; then
+            xdg-mime default proava.desktop application/x-gaeb-xml application/x-gaeb90
+        fi
+    fi
+}
+
+if [ -n "$APPIMAGE_DATEI" ]; then
+    case "$APPIMAGE_DATEI" in
+        /*) ;;
+        *) fehlt "--appimage braucht einen vollen Pfad ($APPIMAGE_DATEI)." ;;
+    esac
+    [ -f "$APPIMAGE_DATEI" ] || fehlt "$APPIMAGE_DATEI fehlt."
+    # Desktop Entry Specification: Programm in Anführungszeichen; darin \ als \\\\, " ` $ mit \,
+    # % als %%.
+    ESC=$(printf '%s' "$APPIMAGE_DATEI" | sed -e 's/\\/\\\\\\\\/g' -e 's/["`$]/\\&/g' -e 's/%/%%/g')
+    einrichten_ohne_programm "\"$ESC\""
+    echo "proAVA (AppImage) eingerichtet:"
+    echo "  Programm   $APPIMAGE_DATEI"
+    echo "  Startmenü  $APPS/proava.desktop"
+    echo "  Dateitypen ${MIME_TYPES[*]}"
+    if [ -x "$BIN/proava" ]; then
+        echo "Hinweis: In $BIN liegt außerdem ein installiertes proAVA – das Startmenü startet jetzt das AppImage."
+    fi
+    exit 0
+fi
 
 if [ -z "$QUELLE" ]; then
     if [ -z "$ROOT" ]; then
@@ -95,7 +155,7 @@ if [ -z "$QUELLE" ]; then
 fi
 [ -x "$QUELLE/proava" ] || fehlt "$QUELLE/proava fehlt – erst scripts/release.sh oder cargo build --release."
 
-mkdir -p "$BIN" "$APPS" "$MIME/packages" "$DOC"
+mkdir -p "$BIN"
 install -m 755 "$QUELLE/proava" "$BIN/proava"
 [ -x "$QUELLE/proava-mcp" ] && install -m 755 "$QUELLE/proava-mcp" "$BIN/proava-mcp"
 # Browserfenster für AUSSCHREIBEN.DE/STLB-Bau Online: liegt es neben proava, nimmt proAVA es.
@@ -104,25 +164,7 @@ if [ -x "$QUELLE/proava-web" ]; then
 else
     rm -f "$BIN/proava-web"
 fi
-for n in "${SIZES[@]}"; do
-    mkdir -p "$ICONS/${n}x${n}/apps"
-    install -m 644 "$ASSETS_ICONS/proava-$n.png" "$ICONS/${n}x${n}/apps/proava.png"
-done
-# Exec mit vollem Pfad: ~/.local/bin steht nicht immer im PATH des Desktops.
-sed "s|^Exec=proava |Exec=$BIN/proava |" "$ASSETS_DESKTOP" >"$APPS/proava.desktop"
-chmod 644 "$APPS/proava.desktop"
-install -m 644 "$ASSETS_MIME" "$MIME/packages/proava.xml"
-install -m 644 "$LIZENZ" "$DOC/LICENSE"
-install -m 644 "$NOTICES" "$DOC/THIRD-PARTY-NOTICES"
-install -m 644 "$HANDBUCH" "$DOC/proava-handbuch.pdf"
-aktualisieren
-
-if command -v xdg-mime >/dev/null 2>&1; then
-    xdg-mime default proava.desktop application/x-proava
-    if [ "$GAEB_STANDARD" = 1 ]; then
-        xdg-mime default proava.desktop application/x-gaeb-xml application/x-gaeb90
-    fi
-fi
+einrichten_ohne_programm "$BIN/proava"
 
 echo "proAVA eingerichtet:"
 echo "  Programm   $BIN/proava ($("$BIN/proava" --version 2>/dev/null || echo '?'))"

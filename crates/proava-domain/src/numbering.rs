@@ -3,9 +3,46 @@
 //! optionally only inside one title's block. The plan can be shown as a
 //! preview (alt → neu) before it is applied.
 
+use std::cell::Cell;
 use std::collections::HashSet;
 
 use crate::lv::{normalize_ordinal, Lv, LvRow, RowId};
+
+/// The answer of an insert that finds no free order number between its
+/// neighbours (0078 | 0079 in an LV with its own numbers).
+pub const NO_FREE_ORDINAL: &str = "An dieser Stelle ist keine Ordnungszahl frei (das LV ist nicht \
+     fortlaufend nummeriert). Erst neu nummerieren oder an anderer Stelle einfügen.";
+
+/// Whether `error` is [`NO_FREE_ORDINAL`] – then [`renumbering_title`] may help.
+pub fn is_no_free_ordinal(error: &str) -> bool {
+    error == NO_FREE_ORDINAL
+}
+
+thread_local! {
+    /// Set while [`renumbering_title`] runs.
+    static RENUMBER_TITLE: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Runs `change` so that every position it inserts takes its place and the
+/// positions of its title are numbered again in steps (the title numbers,
+/// everything outside the title and finished positions stay) – instead of
+/// a free number between the neighbours or [`NO_FREE_ORDINAL`]. For the
+/// answer „Einfügen“ to the question „Einfügen und neu nummerieren?“.
+pub fn renumbering_title<T>(change: impl FnOnce() -> T) -> T {
+    struct Restore(bool);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            RENUMBER_TITLE.with(|flag| flag.set(self.0));
+        }
+    }
+    let _restore = Restore(RENUMBER_TITLE.with(|flag| flag.replace(true)));
+    change()
+}
+
+/// Whether a [`renumbering_title`] runs right now.
+pub fn title_renumbering() -> bool {
+    RENUMBER_TITLE.with(Cell::get)
+}
 
 /// How to renumber.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -25,6 +25,18 @@ Einrichten
   unter ~/.local an; ./install_linux.sh --entfernen nimmt alles wieder weg.
   Ohne Einrichtung startet ./proava direkt aus diesem Ordner.
 
+Als AppImage (eine Datei, z. B. für einen Laptop)
+  proava-<Version>-x86_64.AppImage ausführbar machen (Dateimanager:
+  Eigenschaften > Rechte > „Als Programm ausführen“, oder chmod +x) und
+  starten. Im Startfenster trägt „Ins Startmenü eintragen“ proAVA ins
+  Startmenü ein und öffnet .proava- und GAEB-Dateien mit diesem AppImage
+  (gleich: … .AppImage --integrieren; zurück: … .AppImage --entfernen).
+  Der MCP-Server läuft mit: … .AppImage mcp
+  Läuft ab Ubuntu 24.04 / Linux Mint 22 (glibc 2.39); das Browserfenster
+  braucht WebKitGTK 4.1 vom System (libwebkit2gtk-4.1-0).
+  Neue Version: die Datei durch die neue ersetzen (gleicher Name) oder die
+  neue starten und erneut eintragen.
+
 Lizenz
   © 2026 Oliver Hagmann. proAVA ist quelloffen und kostenlos unter der
   Business Source License 1.1 (LICENSE); verbindlich ist der englische Text.

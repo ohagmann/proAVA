@@ -1,0 +1,28 @@
+#!/bin/sh
+# Einstieg des proAVA-AppImage.
+#
+#   proAVA-…-x86_64.AppImage [DATEI …]     proAVA (DATEI: Projekt oder GAEB-Datei)
+#   proAVA-…-x86_64.AppImage mcp           MCP-Server für KI-Programme (proava-mcp)
+#   proAVA-…-x86_64.AppImage --integrieren Startmenü-Eintrag und Dateitypen (.proava, GAEB)
+#                                          für dieses AppImage; proAVA bietet das im
+#                                          Startfenster auch selbst an
+#   proAVA-…-x86_64.AppImage --entfernen   Eintrag und Dateitypen wieder entfernen
+#
+# Eine Verknüpfung namens „proava-mcp“ auf das AppImage startet ebenfalls den MCP-Server.
+HIER=$(dirname "$(readlink -f "$0")")
+case "${1:-}" in
+    mcp)
+        shift
+        exec "$HIER/usr/bin/proava-mcp" "$@"
+        ;;
+    --integrieren)
+        exec "$HIER/usr/share/proava/install_linux.sh" --appimage "${APPIMAGE:?nur im AppImage}"
+        ;;
+    --entfernen)
+        exec "$HIER/usr/share/proava/install_linux.sh" --entfernen
+        ;;
+esac
+case "$(basename "${ARGV0:-}")" in
+    proava-mcp) exec "$HIER/usr/bin/proava-mcp" "$@" ;;
+esac
+exec "$HIER/usr/bin/proava" "$@"

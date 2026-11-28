@@ -1400,21 +1400,62 @@ impl Lv {
 
     /// Inserts a row at `index` with a free order number between its
     /// neighbours, without renumbering anything else (the id stays if set).
+    /// Inside [`crate::numbering::renumbering_title`] a position numbers
+    /// its title again instead.
     pub fn insert_with_free_ordinal(
         &mut self,
         index: usize,
         mut row: LvRow,
     ) -> Result<RowId, String> {
         let index = index.min(self.rows.len());
+        if row.is_position() && crate::numbering::title_renumbering() {
+            return self.insert_renumbering_title(index, row);
+        }
         if row.has_ordinal() {
-            let ordinal = self.free_ordinal_at(index, &row).ok_or_else(|| {
-                "An dieser Stelle ist keine Ordnungszahl frei (das LV ist nicht fortlaufend \
-                 nummeriert). Erst neu nummerieren oder an anderer Stelle einfügen."
-                    .to_string()
-            })?;
+            let ordinal = self
+                .free_ordinal_at(index, &row)
+                .ok_or_else(|| crate::numbering::NO_FREE_ORDINAL.to_string())?;
             row.set_ordinal(ordinal);
         }
         Ok(self.insert_row(index, row))
+    }
+
+    /// Inserts the position `row` at `index` and numbers the positions of
+    /// its title again in steps: the title numbers, the rows outside the
+    /// title and finished positions stay. Refused (nothing changes) when a
+    /// finished position would need a new number or the new one gets none.
+    fn insert_renumbering_title(&mut self, index: usize, mut row: LvRow) -> Result<RowId, String> {
+        let title = self.rows[..index].iter().rposition(LvRow::is_group);
+        if title.is_none() && self.group_count() > 0 {
+            // Before the first title: the whole LV is no „title“ to renumber.
+            return Err(crate::numbering::NO_FREE_ORDINAL.to_string());
+        }
+        let mode = crate::numbering::RenumberMode {
+            positions_only: true,
+            keep_done: true,
+            scope: title.map(|title| self.rows[title].id()),
+        };
+        let mut trial = self.clone();
+        row.set_ordinal(String::new());
+        let id = trial.insert_row(index, row);
+        let finished = trial.done_positions_affected(mode);
+        if !finished.is_empty() {
+            return Err(format!(
+                "An dieser Stelle ist keine Ordnungszahl frei, und beim Neunummerieren des Titels \
+                 bekämen fertige Positionen eine neue Ordnungszahl ({}). Erst den Status ändern \
+                 oder an anderer Stelle einfügen.",
+                finished.join(", ")
+            ));
+        }
+        trial.renumber_with(mode);
+        let numbered = trial
+            .row_by_id(id)
+            .is_some_and(|row| !row.ordinal().trim().is_empty());
+        if !numbered || trial.duplicate_ordinals().len() > self.duplicate_ordinals().len() {
+            return Err(crate::numbering::NO_FREE_ORDINAL.to_string());
+        }
+        *self = trial;
+        Ok(id)
     }
 
     /// A free order number for `row` if it were inserted at `index`, between
@@ -2659,6 +2700,93 @@ mod tests {
         let id = lv.insert_numbered(lv.rows().len(), new_position()).unwrap();
         assert_eq!(lv.row_by_id(id).unwrap().ordinal(), "03.00.0010");
         assert!(lv.duplicate_ordinals().is_empty());
+    }
+
+    /// Own numbers without a gap (0078 | 0079): the answer „Einfügen“ to the
+    /// question numbers the positions of that title again, nothing else.
+    fn tight_lv() -> Lv {
+        imported_lv(&[
+            ("01", "Titel"),
+            ("01.01", "Untertitel"),
+            ("01.01.0010", "P1"),
+            ("01.01.0075", "P2"),
+            ("01.01.0078", "P3"),
+            ("01.01.0079", "P4"),
+            ("01.01.0080", "P5"),
+            ("01.02", "Untertitel 2"),
+            ("01.02.0011", "P6"),
+            ("01.02.0012", "P7"),
+        ])
+    }
+
+    #[test]
+    fn renumbering_title_inserts_where_no_number_is_free() {
+        use crate::numbering::{renumbering_title, title_renumbering, NO_FREE_ORDINAL};
+        let mut lv = tight_lv();
+        let after_p3 = 5;
+        let before = lv.clone();
+        assert_eq!(
+            lv.insert_numbered(after_p3, new_position()).unwrap_err(),
+            NO_FREE_ORDINAL
+        );
+        assert_eq!(lv, before, "nichts geändert");
+
+        let id = renumbering_title(|| lv.insert_numbered(after_p3, new_position())).unwrap();
+        assert!(!title_renumbering(), "gilt nur innerhalb des Aufrufs");
+        assert_eq!(lv.index_of(id), Some(after_p3));
+        assert_eq!(
+            ordinals(&lv),
+            [
+                "01",
+                "01.01",
+                "01.01.0010",
+                "01.01.0020",
+                "01.01.0030",
+                "01.01.0040",
+                "01.01.0050",
+                "01.01.0060",
+                "01.02",
+                "01.02.0011",
+                "01.02.0012"
+            ],
+            "nur der Titel 01.01 neu, die neue Position mitten drin"
+        );
+        assert_eq!(lv.row_by_id(id).unwrap().ordinal(), "01.01.0040");
+        assert!(lv.duplicate_ordinals().is_empty());
+    }
+
+    #[test]
+    fn renumbering_title_numbers_several_new_rows_in_order() {
+        let mut lv = tight_lv();
+        let (first, second) = crate::numbering::renumbering_title(|| {
+            let first = lv.insert_numbered(5, new_position()).unwrap();
+            let second = lv.insert_numbered(6, new_position()).unwrap();
+            (first, second)
+        });
+        assert_eq!(lv.row_by_id(first).unwrap().ordinal(), "01.01.0040");
+        assert_eq!(lv.row_by_id(second).unwrap().ordinal(), "01.01.0050");
+        assert_eq!(lv.rows()[7].ordinal(), "01.01.0060", "P4 danach");
+        // The last title too: P6 | P7 have no gap either.
+        let id =
+            crate::numbering::renumbering_title(|| lv.insert_numbered(11, new_position())).unwrap();
+        assert_eq!(lv.row_by_id(id).unwrap().ordinal(), "01.02.0020");
+        assert_eq!(lv.rows()[12].ordinal(), "01.02.0030");
+    }
+
+    #[test]
+    fn renumbering_title_keeps_finished_positions() {
+        let mut lv = tight_lv();
+        // P4 (0079) is finished and would become 0050.
+        lv.row_mut(5)
+            .and_then(LvRow::as_position_mut)
+            .unwrap()
+            .set_status(crate::EditStatus::Done);
+        let before = lv.clone();
+        let error = crate::numbering::renumbering_title(|| lv.insert_numbered(5, new_position()))
+            .unwrap_err();
+        assert!(error.contains("fertige Positionen"), "{error}");
+        assert!(error.contains("01.01.0079"), "{error}");
+        assert_eq!(lv, before, "nichts geändert");
     }
 
     #[test]

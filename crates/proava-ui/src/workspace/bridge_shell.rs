@@ -845,6 +845,14 @@ impl WorkspaceScreen {
             .map(|row| row.id())
             .filter(|id| !before.contains(id))
             .collect();
+        if !changed && self.editor.asks_renumbering() {
+            return Err(
+                "An dieser Stelle ist keine Ordnungszahl frei. proAVA fragt den Anwender, ob es \
+                 einfügen und die Positionen des Titels neu nummerieren soll – nach seinem Ja steht \
+                 es drin."
+                    .to_string(),
+            );
+        }
         if !changed || new.is_empty() {
             return Err(error.unwrap_or_else(|| "Es wurde nichts eingefügt.".to_string()));
         }
